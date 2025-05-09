@@ -3,6 +3,8 @@ import numpy as np
 import chess.pgn
 import io
 import re
+import os
+import joblib
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
@@ -250,33 +252,124 @@ def load_pgn_from_file(file_path):
     with open(file_path, 'r') as f:
         return f.read()
 
+def save_model(model, model_path='chess_svm_model.joblib', feature_info_path='feature_info.joblib'):
+    """Save the trained model and feature information to disk."""
+    import joblib
+    
+    # Get the feature transformer from the pipeline
+    preprocessor = model.named_steps['preprocessor']
+    
+    # Save the entire model
+    joblib.dump(model, model_path)
+    print(f"Model saved to {model_path}")
+    
+    # Save feature information separately for future use
+    if hasattr(preprocessor, 'transformers_'):
+        feature_info = {
+            'transformers': preprocessor.transformers_,
+            'output_indices': preprocessor.output_indices_ if hasattr(preprocessor, 'output_indices_') else None
+        }
+        joblib.dump(feature_info, feature_info_path)
+        print(f"Feature information saved to {feature_info_path}")
+    
+    return model_path, feature_info_path
+
+def load_model(model_path='chess_svm_model.joblib'):
+    """Load a previously saved model."""
+    import joblib
+    
+    print(f"Loading model from {model_path}...")
+    try:
+        model = joblib.load(model_path)
+        print("Model loaded successfully!")
+        return model
+    except Exception as e:
+        print(f"Error loading model: {str(e)}")
+        return None
+
+def predict_with_saved_model(model, new_data, categorical_features, numeric_features):
+    """Make predictions using a saved model on new data."""
+    if isinstance(new_data, dict):
+        # If single example provided as dict, convert to DataFrame
+        new_data = pd.DataFrame([new_data])
+        
+    # Ensure all required columns are present
+    for col in categorical_features + numeric_features:
+        if col not in new_data.columns:
+            new_data[col] = None  # Fill with None for missing columns
+    
+    # Make predictions
+    predictions = model.predict(new_data)
+    
+    # Return predictions and probabilities if available
+    if hasattr(model.named_steps['classifier'], 'predict_proba'):
+        probabilities = model.predict_proba(new_data)
+        return predictions, probabilities
+    else:
+        return predictions, None
+
 def main():
     print("Starting Chess PGN SVM Analysis...")
     
     try:
-        # Load PGN data (replace with your file path)
-        pgn_content = load_pgn_from_file("dataset/standardover2000-2021.pgn")
+        # Check if the user wants to use a saved model
+        import sys
+        use_saved_model = "--use-saved" in sys.argv
+        save_model_flag = "--save-model" in sys.argv
         
-        # Parse PGN data
-        games = parse_pgn_file(pgn_content)
-        
-        # Extract features
-        game_features = extract_features_from_games(games)
-        
-        # Prepare data
-        X, y, categorical_features, numeric_features = prepare_data_for_svm(game_features)
-        
-        # Train model
-        print("Training SVM model...")
-        model, (X_train, X_test, y_train, y_test), grid_search = train_svm_model(
-            X, y, categorical_features, numeric_features
-        )
-        
-        # Explain predictions
-        explain_model_predictions(model, X_test, y_test)
-        
-        print("\nAnalysis completed successfully!")
-        
+        if use_saved_model:
+            # Load model and make predictions on new data
+            model_path = next((arg.split('=')[1] for arg in sys.argv if arg.startswith('--model-path=')), 
+                             'chess_svm_model.joblib')
+            model = load_model(model_path)
+            
+            if model is None:
+                print("Could not load model. Exiting.")
+                return
+                
+            # Load new data for prediction (simplified example)
+            # In a real scenario, you would load and process new data here
+            print("Model loaded. You can now use it for predictions.")
+            
+        else:
+            # Regular model training process
+            # Load PGN data (replace with your file path)
+            pgn_content = load_pgn_from_file("dataset/standardover2000-2021.pgn")
+            
+            # Parse PGN data
+            games = parse_pgn_file(pgn_content)
+            
+            # Extract features
+            game_features = extract_features_from_games(games)
+            
+            # Prepare data
+            X, y, categorical_features, numeric_features = prepare_data_for_svm(game_features)
+            
+            # Train model
+            print("Training SVM model...")
+            model, (X_train, X_test, y_train, y_test), grid_search = train_svm_model(
+                X, y, categorical_features, numeric_features
+            )
+            
+            # Explain predictions
+            explain_model_predictions(model, X_test, y_test)
+            
+            # Save model if requested
+            if save_model_flag:
+                model_path = next((arg.split('=')[1] for arg in sys.argv if arg.startswith('--model-path=')), 
+                                'chess_svm_model.joblib')
+                save_model(model, model_path)
+                
+                # Example of saving feature information separately for future reference
+                import joblib
+                joblib.dump({
+                    'categorical_features': categorical_features,
+                    'numeric_features': numeric_features
+                }, 'feature_lists.joblib')
+                print("Feature lists saved to 'feature_lists.joblib'")
+            
+            print("\nAnalysis completed successfully!")
+            
     except Exception as e:
         print(f"Error in main: {str(e)}")
 
