@@ -334,7 +334,7 @@ def main():
         else:
             # Regular model training process
             # Load PGN data (replace with your file path)
-            pgn_content = load_pgn_from_file("dataset/standardover2000-2021.pgn")
+            pgn_content = load_pgn_from_file("dataset/standard16klinesover2000.pgn")
             
             # Parse PGN data
             games = parse_pgn_file(pgn_content)
