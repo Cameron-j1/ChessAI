@@ -7,10 +7,10 @@ from chess_svm_model import ChessMoveEvaluator
 
 # Configuration
 STOCKFISH_PATH = "/usr/games/stockfish"  # Change as needed
-MODEL_PATH = "chess_svm_model.pkl"
+MODEL_PATH = "chess_svm_model_100_games_featuresV3.pkl"
 TIME_LIMITS = []# [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5]  # Simulate lower Elo
 GAMES_PER_CONFIG = 300
-RESULT_CSV = "svm_vs_stockfish_scaled_results.csv"
+RESULT_CSV = "chess_svm_model_100_games_featuresV3_vs_random.csv"
 
 
 def play_vs_stockfish_time_limit(evaluator, time_limit):

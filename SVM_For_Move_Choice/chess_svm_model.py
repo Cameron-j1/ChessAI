@@ -24,6 +24,38 @@ class ChessMoveEvaluator:
         self.stockfish_path = stockfish_path
         self.model = None
         self.scaler = None
+        self.pst = self._generate_simple_pst()
+
+    def _generate_simple_pst(self):
+        """
+        Create a very light-weight piece-square-table (PST).
+    
+        Each entry is the Manhattan distance of the square to the centre (d4-e5),
+        normalised to [-1 , +1] and then multiplied by the classical material
+        value of the piece.  White uses the table as-is, black uses the 8×8 mirror.
+        Enough to give your SVM a sense of *where* a piece sits without hard-coding
+        grand-master heuristics.
+        """
+        # Distance of every square (0…63) from board centre
+        centre_files = np.array([3.5, 4.5])        # d / e files
+        centre_ranks = np.array([3.5, 4.5])        # 4th / 5th ranks
+        dist = np.zeros(64, dtype=np.float32)
+    
+        for sq in range(64):
+            f, r = chess.square_file(sq), chess.square_rank(sq)
+            dist[sq] = np.min(np.abs(f - centre_files) + np.abs(r - centre_ranks))
+    
+        # Normalise to [-1, +1] (0 = very central, 4 = corner)
+        dist = 1.0 - (dist / 4.0) * 2.0        # 0 → +1   |   4 → -1
+    
+        # Multiply by piece values
+        pst = {}
+        piece_values = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3,
+                        chess.ROOK: 5, chess.QUEEN: 9, chess.KING: 0}
+        for ptype, pval in piece_values.items():
+            pst[ptype] = dist * pval
+    
+        return pst
         
     def _get_piece_value(self, piece_type):
         """Return the material value of a piece"""
@@ -37,6 +69,39 @@ class ChessMoveEvaluator:
         }
         return values.get(piece_type, 0)
     
+    def _square_to_feature(self, square):
+        # Converts square index (0–63) to a number between 0 and 63; returns -1 if None
+        return square if square is not None else -1
+
+    def _pst_scores(self, board: chess.Board, pst_tables) -> tuple[float, float]:
+        """
+        Sum of PST values for each side (white, black).
+        """
+        white_score = 0.0
+        black_score = 0.0
+        for sq, piece in board.piece_map().items():
+            val = pst_tables[piece.piece_type][sq]
+            if piece.color == chess.WHITE:
+                white_score += val
+            else:
+                # mirror for black
+                mirror_sq = chess.square_mirror(sq)
+                black_score += pst_tables[piece.piece_type][mirror_sq]
+        return white_score, black_score
+    
+    def _manhattan(self, a: int, b: int) -> int:
+        """Manhattan distance between two squares (0…63)."""
+        return abs(chess.square_file(a) - chess.square_file(b)) + \
+               abs(chess.square_rank(a) - chess.square_rank(b))
+    
+    def _material_on_board(self, board: chess.Board) -> int:
+        vals = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3,
+                chess.ROOK: 5, chess.QUEEN: 9}
+        total = 0
+        for piece in board.piece_map().values():
+            total += vals.get(piece.piece_type, 0) * (1 if piece.color else -1)
+        return total
+
     def _extract_board_features(self, board):
         """
         Extract features from a chess board position
@@ -62,18 +127,18 @@ class ChessMoveEvaluator:
         
         features.append(white_material - black_material)  # Material advantage
         
-        # Piece placement features (64 squares * 12 piece types = 768 features)
-        # We'll use a more compact representation
-        piece_placement = np.zeros(64)
-        for square in chess.SQUARES:
-            piece = board.piece_at(square)
-            if piece:
-                value = self._get_piece_value(piece.piece_type)
-                if piece.color == chess.BLACK:
-                    value = -value
-                piece_placement[square] = value
+        #one-hot encoding board state
+        vec = np.zeros(12 * 64, dtype=np.int8)
+        for sq, piece in board.piece_map().items():
+            offset = (piece.color * 6 + (piece.piece_type - 1)) * 64
+            vec[offset + sq] = 1
+        features.extend(vec)
+
+        #pst scores
+        w_pst, b_pst = self._pst_scores(board, self.pst)
+        features.append(w_pst - b_pst)              # positional edge  (scalar)
+        features.append(w_pst + b_pst)
         
-        features.extend(piece_placement)
         
         # Control of the center (e4, d4, e5, d5)
         center_squares = [chess.E4, chess.D4, chess.E5, chess.D5]
@@ -135,66 +200,61 @@ class ChessMoveEvaluator:
         features.append(1 if board.is_check() else 0)
         
         return features
-    
-    def _extract_move_features(self, board, move):
-        """
-        Extract features specific to a candidate move
         
-        Args:
-            board (chess.Board): Current board position
-            move (chess.Move): Candidate move
-            
-        Returns:
-            list: Features representing the move
-        """
-        features = []
-        
-        # Capture value
-        if board.is_capture(move):
-            captured_piece = board.piece_at(move.to_square)
-            if captured_piece:
-                capturing_piece = board.piece_at(move.from_square)
-                capture_value = self._get_piece_value(captured_piece.piece_type) - self._get_piece_value(capturing_piece.piece_type)
-                features.append(capture_value)  # Value of captured piece minus value of capturing piece
-            else:  # En passant
-                features.append(1)  # Pawn value
-        else:
-            features.append(0)  # No capture
-            
-        # Check if move gives check
-        board_copy = board.copy()
-        board_copy.push(move)
-        features.append(1 if board_copy.is_check() else 0)
-        
-        # Moving to a square attacked by opponent's pawn
-        to_square = move.to_square
-        features.append(1 if board.is_attacked_by(not board.turn, to_square) else 0)
-        
-        # Move to center control
-        center_squares = [chess.E4, chess.D4, chess.E5, chess.D5]
-        features.append(1 if move.to_square in center_squares else 0)
-        
-        # Piece type being moved
+    def _extract_move_features(self, board: chess.Board, move: chess.Move) -> list[float]:
+        feat = []
+
+        moving_piece = board.piece_at(move.from_square)
+        captured_piece = board.piece_at(move.to_square)
+
         moving_piece = board.piece_at(move.from_square)
         if moving_piece:
             piece_type_one_hot = [0] * 6  # One-hot encoding for piece type
             piece_type_one_hot[moving_piece.piece_type - 1] = 1  # Adjust for 0-indexing
-            features.extend(piece_type_one_hot)
+            feat.extend(piece_type_one_hot)
         else:
-            features.extend([0, 0, 0, 0, 0, 0])  # Shouldn't happen with legal moves
+            feat.extend([0, 0, 0, 0, 0, 0])  # Shouldn't happen with legal moves
+
+        to_square = move.to_square
+        feat.append(1 if board.is_attacked_by(not board.turn, to_square) else 0)
+
+        # 1. Value of moving piece  -----------------------------------------
+        feat.append(self._get_piece_value(moving_piece.piece_type))
+
+        # 2. Manhattan distance travelled  ----------------------------------
+        feat.append(self._manhattan(move.from_square, move.to_square))
+
+        # 3. Is capture (binary)  -------------------------------------------
+        feat.append(1 if captured_piece else 0)
+
+        # 4. Static exchange evaluation (SEE lite)  -------------------------
+        see = 0
+        if captured_piece:
+            see = self._get_piece_value(captured_piece.piece_type) - \
+                self._get_piece_value(moving_piece.piece_type)
+        feat.append(see)
+
+        # 5. Δ material after the move  -------------------------------------
+        before = self._material_on_board(board)
+        board_copy = board.copy()
+        board_copy.push(move)
+        after = self._material_on_board(board_copy)
+        feat.append(after - before)
+
+        # 6. Promotion piece value (0 if none)  -----------------------------
+        feat.append(self._get_piece_value(move.promotion) if move.promotion else 0)
+
+        # 7. Castling (binary)  ---------------------------------------------
+        feat.append(1 if board.is_castling(move) else 0)
+
+        # Check if move gives check
+        board_copy = board.copy()
+        board_copy.push(move)
+        feat.append(1 if board_copy.is_check() else 0)
+
+        return feat
             
-        # Promotion
-        if move.promotion:
-            promotion_value = self._get_piece_value(move.promotion)
-            features.append(promotion_value)
-        else:
-            features.append(0)
-            
-        # Castle move
-        features.append(1 if board.is_castling(move) else 0)
-        
-        return features
-            
+
     def prepare_training_data(self, pgn_files, num_games=None):
         """
         Process PGN files to create training data - optimized version
@@ -442,7 +502,7 @@ if __name__ == "__main__":
     evaluator.train(X, y)
     
     # Save the model
-    evaluator.save_model("chess_svm_model_700_games.pkl")
+    evaluator.save_model("chess_svm_model_700_games_featuresV3.pkl")
     
     # Example: Evaluate a position
     board = chess.Board()
