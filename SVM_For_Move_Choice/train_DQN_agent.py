@@ -43,7 +43,10 @@ class ChessDQNAgent:
 
         # --- networks ---
         obs_dim   = self.env.observation_space.shape[0]
+        print(obs_dim)
         act_dim   = self.env.action_space.n
+        print(act_dim)
+
         self.qnet = DQN(obs_dim, act_dim).to(DEVICE)
         self.tgt  = DQN(obs_dim, act_dim).to(DEVICE)
         self.tgt.load_state_dict(self.qnet.state_dict())

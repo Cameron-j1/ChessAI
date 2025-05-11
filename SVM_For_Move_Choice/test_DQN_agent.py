@@ -278,5 +278,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nError during testing: {str(e)}")
 
-# python test_DQN_agent.py --model DQN_agent_10episodes.pth --games 100 --elo 1350 --mode "both"
+# python test_DQN_agent.py --model DQN_agent_1000episodes.pth --games 100 --elo 1350 --mode "both"
 
