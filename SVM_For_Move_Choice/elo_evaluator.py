@@ -6,12 +6,13 @@ import os
 from chess_svm_model import ChessMoveEvaluator
 
 # Configuration
+#old models don't work anymore
 STOCKFISH_PATH = "/usr/games/stockfish"  # Change as needed
-MODEL_PATH = "chess_svm_model_100_games_featuresV3.pkl"
-TIME_LIMITS = []# [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5]  # Simulate lower Elo
-GAMES_PER_CONFIG = 300
-RESULT_CSV = "chess_svm_model_100_games_featuresV3_vs_random.csv"
-
+MODEL_PATH = "chess_svm_model_5000_games_featuresV3_architectureV2_GPUtrained.pkl"
+TIME_LIMITS = [0.001]  # Simulate lower Elo
+GAMES_PER_CONFIG = 10
+# RESULT_CSV = "chess_svm_model_700_games_featuresV3_gpu_vs_random.csv"
+RESULT_CSV = "chess_svm_model_5000_games_featuresV3_architectureV2_GPUtrained_vs_random.csv"
 
 def play_vs_stockfish_time_limit(evaluator, time_limit):
     board = chess.Board()
@@ -75,26 +76,26 @@ def main():
         })
 
     # Random move opponent
-    print("Testing vs Random Move Opponent...")
-    wins, draws, losses = 0, 0, 0
-    for i in range(GAMES_PER_CONFIG):
-        print(i)
-        outcome = play_vs_random(evaluator)
-        if outcome.winner is None:
-            draws += 1
-        elif outcome.winner == chess.WHITE:
-            wins += 1
-        else:
-            losses += 1
-    results.append({
-        "opponent": "Random",
-        "wins": wins,
-        "draws": draws,
-        "losses": losses,
-        "win_rate": wins / GAMES_PER_CONFIG,
-        "draw_rate": draws / GAMES_PER_CONFIG,
-        "loss_rate": losses / GAMES_PER_CONFIG
-    })
+    # print("Testing vs Random Move Opponent...")
+    # wins, draws, losses = 0, 0, 0
+    # for i in range(GAMES_PER_CONFIG):
+    #     print(i)
+    #     outcome = play_vs_random(evaluator)
+    #     if outcome.winner is None:
+    #         draws += 1
+    #     elif outcome.winner == chess.WHITE:
+    #         wins += 1
+    #     else:
+    #         losses += 1
+    # results.append({
+    #     "opponent": "Random",
+    #     "wins": wins,
+    #     "draws": draws,
+    #     "losses": losses,
+    #     "win_rate": wins / GAMES_PER_CONFIG,
+    #     "draw_rate": draws / GAMES_PER_CONFIG,
+    #     "loss_rate": losses / GAMES_PER_CONFIG
+    # })
 
     # Save to CSV
     with open(RESULT_CSV, mode='w', newline='') as file:

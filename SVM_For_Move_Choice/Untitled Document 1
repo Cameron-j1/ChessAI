@@ -1,0 +1,129 @@
+original board encoding
+  def _extract_board_features(self, board):
+        """
+        Extract features from a chess board position
+        
+        Args:
+            board (chess.Board): Current board position
+            
+        Returns:
+            list: Features representing the board state
+        """
+        features = []
+        
+        # Material count
+        white_material = 0
+        black_material = 0
+        for square in chess.SQUARES:
+            piece = board.piece_at(square)
+            if piece:
+                if piece.color == chess.WHITE:
+                    white_material += self._get_piece_value(piece.piece_type)
+                else:
+                    black_material += self._get_piece_value(piece.piece_type)
+        
+        features.append(white_material - black_material)  # Material advantage
+        
+        # Piece placement features (64 squares * 12 piece types = 768 features)
+        # We'll use a more compact representation
+        piece_placement = np.zeros(64)
+        for square in chess.SQUARES:
+            piece = board.piece_at(square)
+            if piece:
+                value = self._get_piece_value(piece.piece_type)
+                if piece.color == chess.BLACK:
+                    value = -value
+                piece_placement[square] = value
+        
+        features.extend(piece_placement)
+        
+        # Control of the center (e4, d4, e5, d5)
+        center_squares = [chess.E4, chess.D4, chess.E5, chess.D5]
+        white_center_control = sum(1 for sq in center_squares if board.is_attacked_by(chess.WHITE, sq))
+        black_center_control = sum(1 for sq in center_squares if board.is_attacked_by(chess.BLACK, sq))
+        features.append(white_center_control - black_center_control)
+        
+        # Mobility (number of legal moves)
+        if board.turn == chess.WHITE:
+            features.append(len(list(board.legal_moves)))
+            board.turn = chess.BLACK
+            features.append(-len(list(board.legal_moves)))
+            board.turn = chess.WHITE
+        else:
+            features.append(-len(list(board.legal_moves)))
+            board.turn = chess.WHITE
+            features.append(len(list(board.legal_moves)))
+            board.turn = chess.BLACK
+            
+        # King safety (attacks near king)
+        for color in [chess.WHITE, chess.BLACK]:
+            king_square = board.king(color)
+            if king_square:
+                king_neighborhood = chess.SquareSet(chess.BB_KING_ATTACKS[king_square])
+                attacks = sum(1 for sq in king_neighborhood if board.is_attacked_by(not color, sq))
+                if color == chess.WHITE:
+                    features.append(-attacks)  # Negative for white king being attacked
+                else:
+                    features.append(attacks)  # Positive for black king being attacked
+            else:
+                features.append(0)  # No king (shouldn't happen in normal chess)
+                
+        # Pawn structure features
+        white_pawns = board.pieces(chess.PAWN, chess.WHITE)
+        black_pawns = board.pieces(chess.PAWN, chess.BLACK)
+        
+        # Doubled pawns
+        white_doubled = 0
+        black_doubled = 0
+        for file_idx in range(8):
+            file_mask = chess.BB_FILES[file_idx]
+            white_pawns_in_file = len(white_pawns & file_mask)
+            black_pawns_in_file = len(black_pawns & file_mask)
+            if white_pawns_in_file > 1:
+                white_doubled += white_pawns_in_file - 1
+            if black_pawns_in_file > 1:
+                black_doubled += black_pawns_in_file - 1
+        
+        features.append(black_doubled - white_doubled)  # Doubled pawns disadvantage
+        
+        # Game phase
+        total_pieces = len(board.pieces(chess.QUEEN, chess.WHITE)) + len(board.pieces(chess.QUEEN, chess.BLACK)) + \
+                      len(board.pieces(chess.ROOK, chess.WHITE)) + len(board.pieces(chess.ROOK, chess.BLACK)) + \
+                      len(board.pieces(chess.BISHOP, chess.WHITE)) + len(board.pieces(chess.BISHOP, chess.BLACK)) + \
+                      len(board.pieces(chess.KNIGHT, chess.WHITE)) + len(board.pieces(chess.KNIGHT, chess.BLACK))
+        features.append(total_pieces)  # Higher means earlier game phases
+        
+        # Check status
+        features.append(1 if board.is_check() else 0)
+        
+        return features
+        
+v2 board encoding
+# --- Piece Positions (32 pieces × 1 feature each = 32 features) ---
+    # Piece order: white king, queen, rooks, bishops, knights, pawns, then black (same order)
+    piece_order = [
+        (chess.KING, chess.WHITE), (chess.QUEEN, chess.WHITE),
+        (chess.ROOK, chess.WHITE), (chess.ROOK, chess.WHITE),
+        (chess.BISHOP, chess.WHITE), (chess.BISHOP, chess.WHITE),
+        (chess.KNIGHT, chess.WHITE), (chess.KNIGHT, chess.WHITE),
+    ] + [(chess.PAWN, chess.WHITE)] * 8 + [
+        (chess.KING, chess.BLACK), (chess.QUEEN, chess.BLACK),
+        (chess.ROOK, chess.BLACK), (chess.ROOK, chess.BLACK),
+        (chess.BISHOP, chess.BLACK), (chess.BISHOP, chess.BLACK),
+        (chess.KNIGHT, chess.BLACK), (chess.KNIGHT, chess.BLACK),
+    ] + [(chess.PAWN, chess.BLACK)] * 8
+
+    seen = set()
+    for piece_type, color in piece_order:
+        found = False
+        for square in board.pieces(piece_type, color):
+            if square not in seen:
+                seen.add(square)
+                features.append(self._square_to_feature(square))
+                found = True
+                break
+        if not found:
+            features.append(-1)  # Piece is captured
+            
+            
+v3 board encoding and GPU accel

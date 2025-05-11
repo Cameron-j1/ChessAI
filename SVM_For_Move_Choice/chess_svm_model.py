@@ -3,9 +3,7 @@ import chess.pgn
 import chess.engine
 import numpy as np
 import pandas as pd
-from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 import os
 import io
@@ -13,28 +11,45 @@ import joblib
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+# GPU imports - CuML SVM implementation
+import cudf
+import cuml
+from cuml.svm import SVC as cuSVC
+from cuml.preprocessing import StandardScaler as cuStandardScaler
+
+from sklearn.pipeline import Pipeline  # not from cuml
+
 class ChessMoveEvaluator:
-    def __init__(self, stockfish_path="stockfish"):
+    def __init__(self, stockfish_path="stockfish", use_gpu=True):
         """
         Initialize the Chess Move Evaluator
         
         Args:
             stockfish_path (str): Path to Stockfish engine executable
+            use_gpu (bool): Whether to use GPU acceleration
         """
         self.stockfish_path = stockfish_path
         self.model = None
         self.scaler = None
         self.pst = self._generate_simple_pst()
+        self.use_gpu = use_gpu
+        
+        # Print GPU info if using GPU
+        if self.use_gpu:
+            try:
+                import cupy as cp
+                print(f"GPU detected: {cp.cuda.runtime.getDeviceProperties(0)['name'].decode()}")
+                print(f"CUDA version: {cp.cuda.runtime.runtimeGetVersion()}")
+            except ImportError:
+                print("CuPy not found. Install with: pip install cupy-cuda11x (replace x with your CUDA version)")
+            except Exception as e:
+                print(f"Error detecting GPU: {e}")
+                self.use_gpu = False
+                print("Falling back to CPU mode")
 
     def _generate_simple_pst(self):
         """
         Create a very light-weight piece-square-table (PST).
-    
-        Each entry is the Manhattan distance of the square to the centre (d4-e5),
-        normalised to [-1 , +1] and then multiplied by the classical material
-        value of the piece.  White uses the table as-is, black uses the 8×8 mirror.
-        Enough to give your SVM a sense of *where* a piece sits without hard-coding
-        grand-master heuristics.
         """
         # Distance of every square (0…63) from board centre
         centre_files = np.array([3.5, 4.5])        # d / e files
@@ -218,33 +233,33 @@ class ChessMoveEvaluator:
         to_square = move.to_square
         feat.append(1 if board.is_attacked_by(not board.turn, to_square) else 0)
 
-        # 1. Value of moving piece  -----------------------------------------
+        # 1. Value of moving piece
         feat.append(self._get_piece_value(moving_piece.piece_type))
 
-        # 2. Manhattan distance travelled  ----------------------------------
+        # 2. Manhattan distance travelled
         feat.append(self._manhattan(move.from_square, move.to_square))
 
-        # 3. Is capture (binary)  -------------------------------------------
+        # 3. Is capture (binary)
         feat.append(1 if captured_piece else 0)
 
-        # 4. Static exchange evaluation (SEE lite)  -------------------------
+        # 4. Static exchange evaluation (SEE lite)
         see = 0
         if captured_piece:
             see = self._get_piece_value(captured_piece.piece_type) - \
                 self._get_piece_value(moving_piece.piece_type)
         feat.append(see)
 
-        # 5. Δ material after the move  -------------------------------------
+        # 5. Δ material after the move
         before = self._material_on_board(board)
         board_copy = board.copy()
         board_copy.push(move)
         after = self._material_on_board(board_copy)
         feat.append(after - before)
 
-        # 6. Promotion piece value (0 if none)  -----------------------------
+        # 6. Promotion piece value (0 if none)
         feat.append(self._get_piece_value(move.promotion) if move.promotion else 0)
 
-        # 7. Castling (binary)  ---------------------------------------------
+        # 7. Castling (binary)
         feat.append(1 if board.is_castling(move) else 0)
 
         # Check if move gives check
@@ -254,7 +269,6 @@ class ChessMoveEvaluator:
 
         return feat
             
-
     def prepare_training_data(self, pgn_files, num_games=None):
         """
         Process PGN files to create training data - optimized version
@@ -264,8 +278,6 @@ class ChessMoveEvaluator:
         Returns:
             tuple: (X, y) feature matrix and target values
         """
-        
-        
         features_list = []
         labels = []
         games_processed = 0
@@ -328,7 +340,7 @@ class ChessMoveEvaluator:
                             if pos_hash in position_cache:
                                 evals_before.append(position_cache[pos_hash])
                             else:
-                                eval_score = self._get_stockfish_evaluation(pos, engine)
+                                eval_score = self._get_stockfish_evaluation(pos, engine, time_limit=0.001)
                                 position_cache[pos_hash] = eval_score
                                 evals_before.append(eval_score)
                         
@@ -344,7 +356,7 @@ class ChessMoveEvaluator:
                                 # Negate because perspective switches
                                 evals_after.append(-position_cache[pos_hash])
                             else:
-                                eval_score = self._get_stockfish_evaluation(new_pos, engine)
+                                eval_score = self._get_stockfish_evaluation(new_pos, engine, time_limit=0.001)
                                 position_cache[pos_hash] = eval_score
                                 # Negate because perspective switches
                                 evals_after.append(-eval_score)
@@ -401,32 +413,93 @@ class ChessMoveEvaluator:
             # Only close if we created a new engine
             if close_engine and engine:
                 engine.quit()
+                
+    def _to_gpu_arrays(self, X, y):
+        """Convert numpy arrays to GPU arrays"""
+        try:
+            import cupy as cp
+            X_gpu = cp.array(X, dtype=cp.float32)
+            y_gpu = cudf.Series(y)
+            return X_gpu, y_gpu
+        except ImportError:
+            print("CuPy not found. Install with: pip install cupy-cuda11x")
+            return X, y
+        except Exception as e:
+            print(f"Error converting to GPU arrays: {e}")
+            print("Falling back to CPU arrays")
+            return X, y
+        
+
+    def _safe_predict_proba(self, X):
+        try:
+            proba = self.model.predict_proba(X)
+            if hasattr(proba, "get"):
+                proba = proba.get()
+            return proba
+        except Exception as e:
+            print(f"Predict_proba fallback due to: {e}")
+            return self.model.predict_proba(X)
+
         
     def train(self, X, y):
         """
-        Train the SVM model on the prepared data
+        Train the SVM model on the prepared data, utilizing GPU if available
         
         Args:
             X (np.array): Feature matrix
             y (np.array): Target labels
         """
+        from sklearn.pipeline import Pipeline
+        from sklearn.svm import SVC
+        from sklearn.preprocessing import StandardScaler
+
         # Split data into training and validation sets
         X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-        # Create a pipeline with scaling and SVM
+
+        if self.use_gpu:
+            try:
+                print("Setting up GPU training pipeline...")
+
+                # Convert data to GPU format
+                import cupy as cp
+                X_train_gpu = cp.array(X_train, dtype=cp.float32)
+                X_val_gpu = cp.array(X_val, dtype=cp.float32)
+                import cudf
+                y_train_gpu = cudf.Series(y_train)
+                y_val_gpu = cudf.Series(y_val)
+
+                # CuML components inside sklearn pipeline
+                from cuml.svm import SVC as cuSVC
+                from cuml.preprocessing import StandardScaler as cuStandardScaler
+
+                self.model = Pipeline([
+                    ('scaler', cuStandardScaler()),
+                    ('svm', cuSVC(kernel='rbf', C=1.0, probability=True))
+                ])
+
+                print("Training SVM model on GPU...")
+                self.model.fit(X_train_gpu, y_train_gpu)
+
+                # Evaluate on validation set
+                val_accuracy = self.model.score(X_val_gpu, y_val_gpu)
+                print(f"Validation accuracy (GPU): {val_accuracy:.4f}")
+                return val_accuracy
+
+            except Exception as e:
+                print(f"Error during GPU training: {e}")
+                print("Falling back to CPU training")
+                self.use_gpu = False
+
+        # CPU fallback
+        print("Setting up CPU training pipeline...")
         self.model = Pipeline([
             ('scaler', StandardScaler()),
             ('svm', SVC(kernel='rbf', C=1.0, probability=True))
         ])
-        
-        # Train the model
-        print("Training SVM model...")
+        print("Training SVM model on CPU...")
         self.model.fit(X_train, y_train)
-        
-        # Evaluate on validation set
         val_accuracy = self.model.score(X_val, y_val)
-        print(f"Validation accuracy: {val_accuracy:.4f}")
-        
+        print(f"Validation accuracy (CPU): {val_accuracy:.4f}")
         return val_accuracy
     
     def evaluate_move(self, board, move):
@@ -448,8 +521,20 @@ class ChessMoveEvaluator:
         move_features = self._extract_move_features(board, move)
         all_features = board_features + move_features
         
-        # Make prediction
-        confidence = self.model.predict_proba([all_features])[0][1]  # Probability of class 1
+        # Convert to appropriate format based on model type
+        if self.use_gpu:
+            try:
+                import cupy as cp
+                features_gpu = cp.array([all_features], dtype=cp.float32)
+                confidence = self._safe_predict_proba(features_gpu)[0][1]
+            except Exception as e:
+                # Fallback to CPU prediction if GPU fails
+                print(f"GPU prediction failed: {e}, falling back to CPU")
+                confidence = self._safe_predict_proba([all_features])[0][1]
+        else:
+            # Make prediction on CPU
+            confidence = self._safe_predict_proba([all_features])[0][1]
+            
         return confidence
     
     def find_best_move(self, board):
@@ -468,41 +553,107 @@ class ChessMoveEvaluator:
         best_move = None
         best_confidence = -1
         
-        for move in board.legal_moves:
-            confidence = self.evaluate_move(board, move)
-            if confidence > best_confidence:
-                best_confidence = confidence
-                best_move = move
+        # For GPU processing, we can batch all legal moves for more efficient evaluation
+        if self.use_gpu and len(list(board.legal_moves)) > 5:
+            # Extract features for all legal moves
+            all_moves = list(board.legal_moves)
+            batch_features = []
+            
+            for move in all_moves:
+                board_features = self._extract_board_features(board)
+                move_features = self._extract_move_features(board, move)
+                all_features = board_features + move_features
+                batch_features.append(all_features)
+                
+            try:
+                # Process all moves at once on GPU
+                import cupy as cp
+                batch_features_gpu = cp.array(batch_features, dtype=cp.float32)
+                confidences = self._safe_predict_proba(batch_features_gpu)[:, 1]
+                
+                # Find the move with highest confidence
+                best_idx = int(np.argmax(confidences))
+                best_move = all_moves[best_idx]
+                best_confidence = float(confidences[best_idx])
+            except Exception as e:
+                print(f"Batch GPU prediction failed: {e}, falling back to sequential CPU")
+                # Fall back to sequential evaluation
+                for move in board.legal_moves:
+                    confidence = self.evaluate_move(board, move)
+                    if confidence > best_confidence:
+                        best_confidence = confidence
+                        best_move = move
+        else:
+            # Sequential evaluation (CPU or small number of moves)
+            for move in board.legal_moves:
+                confidence = self.evaluate_move(board, move)
+                if confidence > best_confidence:
+                    best_confidence = confidence
+                    best_move = move
                 
         return best_move, best_confidence
     
     def save_model(self, filename="chess_svm_model.pkl"):
-        """Save the trained model to a file"""
+        """
+        Save the trained model to a file. If GPU was used, warns about compatibility.
+        """
         if self.model is None:
             raise ValueError("No model to save")
-        joblib.dump(self.model, filename)
-        print(f"Model saved to {filename}")
+
+        try:
+            joblib.dump({
+                "model": self.model,
+                "use_gpu": self.use_gpu
+            }, filename)
+            print(f"Model saved to {filename} (GPU: {self.use_gpu})")
+        except Exception as e:
+            print(f"Error saving model: {e}")
     
     def load_model(self, filename="chess_svm_model.pkl"):
-        """Load a trained model from a file"""
-        self.model = joblib.load(filename)
-        print(f"Model loaded from {filename}")
+        """
+        Load a trained model and determine whether GPU should be used based on the model type.
+        """
+        try:
+            data = joblib.load(filename)
+
+            if isinstance(data, dict) and "model" in data:
+                self.model = data["model"]
+                was_gpu_trained = data.get("use_gpu", False)
+
+                # Adjust use_gpu based on current environment
+                if self.use_gpu and not was_gpu_trained:
+                    print("Loaded a CPU-trained model. Disabling GPU inference for compatibility.")
+                    self.use_gpu = False
+                elif not self.use_gpu and was_gpu_trained:
+                    print("Warning: This model was trained on GPU. Set use_gpu=True if compatible.")
+
+            else:
+                # Legacy fallback for plain model (no GPU info saved)
+                self.model = data
+                print("Model loaded (legacy format). Assuming CPU.")
+                self.use_gpu = False
+
+            print(f"Model loaded from {filename} (GPU: {self.use_gpu})")
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to load model from {filename}: {e}")
+
 
 
 # Example usage
 if __name__ == "__main__":
-    # Initialize the evaluator
-    evaluator = ChessMoveEvaluator(stockfish_path="/usr/games/stockfish")  # Update path as needed
+    # Initialize the evaluator with GPU support
+    evaluator = ChessMoveEvaluator(stockfish_path="/usr/games/stockfish", use_gpu=True)
     
     # Prepare data from PGN files
-    pgn_files = ["standard16klinesover2000.pgn"]  # Add your PGN files here
-    X, y = evaluator.prepare_training_data(pgn_files, num_games=700)  # Start with a small sample
+    pgn_files = ["standardover2000-2021.pgn"]  # Add your PGN files here
+    X, y = evaluator.prepare_training_data(pgn_files, num_games=25000)  # Start with a small sample
     
-    # Train the model
+    # Train the model on GPU
     evaluator.train(X, y)
     
     # Save the model
-    evaluator.save_model("chess_svm_model_700_games_featuresV3.pkl")
+    evaluator.save_model("chess_svm_model_25000_games_featuresV3_architectureV2_GPUtrained.pkl")
     
     # Example: Evaluate a position
     board = chess.Board()
