@@ -431,6 +431,10 @@ class ChessMoveEvaluator:
         
 
     def _safe_predict_proba(self, X):
+        #added for DQN compatibility
+        if isinstance(X, list):
+            X = np.asarray(X, dtype=np.float32)
+
         try:
             proba = self.model.predict_proba(X)
             if hasattr(proba, "get"):

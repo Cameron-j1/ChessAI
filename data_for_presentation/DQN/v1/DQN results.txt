@@ -1,0 +1,41 @@
+DQN reults:
+v1 dqn methodology:
+
+
+DQN_agent_10episodes.pth:
+Testing against Stockfish (Elo: 1350)...
+
+=== vs Stockfish (Elo 1350) ===
+Games: 100 | W 0 / D 0 / L 100
+Win rate: 0.0% | Draw rate: 0.0% | Loss rate: 100.0%
+Move-match vs Stockfish: 277/2301 (12.04 %)
+----------------------------------------
+
+Testing against Random player...
+
+=== vs Random ===
+Games: 100 | W 1 / D 91 / L 8
+Win rate: 1.0% | Draw rate: 91.0% | Loss rate: 8.0%
+----------------------------------------
+
+
+DQN_agent_100episodes.pth:
+Testing against Stockfish (Elo: 1350)...
+
+=== vs Stockfish (Elo 1350) ===
+Games: 100 | W 0 / D 0 / L 100
+Win rate: 0.0% | Draw rate: 0.0% | Loss rate: 100.0%
+Move-match vs Stockfish: 251/1931 (13.00 %)
+----------------------------------------
+
+Testing against Random player...
+
+=== vs Random ===
+Games: 100 | W 7 / D 85 / L 8
+Win rate: 7.0% | Draw rate: 85.0% | Loss rate: 8.0%
+----------------------------------------
+
+Testing completed successfully.
+
+
+
