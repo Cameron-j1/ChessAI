@@ -283,7 +283,7 @@ class ChessMoveEvaluator:
         games_processed = 0
         
         # Batch size for processing
-        BATCH_SIZE = 10  # Process 10 positions at once before sending to engine
+        BATCH_SIZE = 25  # Process 10 positions at once before sending to engine
         
         # Create engine once outside of game loop
         with chess.engine.SimpleEngine.popen_uci(self.stockfish_path) as engine:
@@ -647,7 +647,7 @@ class ChessMoveEvaluator:
 # Example usage
 if __name__ == "__main__":
     # Initialize the evaluator with GPU support
-    evaluator = ChessMoveEvaluator(stockfish_path="/usr/games/stockfish", use_gpu=True)
+    evaluator = ChessMoveEvaluator(stockfish_path="/usr/games/stockfish", use_gpu=False)
     
     # Prepare data from PGN files
     pgn_files = ["standardover2000-2021.pgn"]  # Add your PGN files here

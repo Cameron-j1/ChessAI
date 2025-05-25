@@ -1,1 +1,4 @@
-/chess_venv
+/chess_env
+/attempt_3/chess_env
+*.pth
+*.pgn
