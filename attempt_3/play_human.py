@@ -20,7 +20,7 @@ class ChessGUI:
         self.board = chess.Board()
         
         # Initialize the AI
-        model_path = 'models/trainv2_model_architecture_v2_epochs20.pth'
+        model_path = 'models/trainv3_model_architecture_v2_epochs250.pth'
         mapping_path = 'models/move_to_int_architecture_v2'
         self.ai = ChessEvaluator(model_path, mapping_path)
         

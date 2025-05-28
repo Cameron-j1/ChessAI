@@ -29,8 +29,8 @@ files = [file for file in os.listdir("./") if file.endswith(".pgn")]
 LIMIT_OF_FILES = min(len(files), 28)
 
 # Estimate number of positions per game (average)
-POSITIONS_PER_GAME = 40  # Chess games average about 40 moves
-TARGET_POSITIONS = 2300000  # The number of positions we want
+POSITIONS_PER_GAME = 105  # Chess games average about 70 moves
+TARGET_POSITIONS = 2000000  # The number of positions we want
 # TARGET_POSITIONS = 1500000  # The number of positions we want
 ESTIMATED_GAMES_NEEDED = TARGET_POSITIONS // POSITIONS_PER_GAME
 
@@ -39,8 +39,11 @@ games = []
 positions_loaded = 0
 i = 1
 for file in tqdm(files, desc="Loading PGN files"):
+    print(f"Loading {file}")
     file_games = load_pgn(file)
-    for game in file_games:
+    for i, game in enumerate(file_games):
+        if i % 100 == 0:
+            print(f"Loaded {i} games from {file}")
         games.append(game)
         positions_loaded += len(list(game.mainline_moves()))
         if len(games) >= ESTIMATED_GAMES_NEEDED:
@@ -72,7 +75,7 @@ y = torch.tensor(y, dtype=torch.long)
 
 # Create Dataset and DataLoader with larger batch size
 dataset = ChessDataset(X, y)
-batch_size = 256  # Increased from 64
+batch_size = 768  # Increased from 64
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
 
 # Check for GPU
@@ -88,7 +91,7 @@ initial_lr = 0.001  # Increased from 0.0001
 optimizer = optim.Adam(model.parameters(), lr=initial_lr)
 
 # Add cosine annealing scheduler
-num_epochs = 50
+num_epochs = 250
 scheduler = CosineAnnealingLR(optimizer, T_max=num_epochs, eta_min=1e-6)
 
 print(f"Training with batch size: {batch_size}, initial learning rate: {initial_lr}")
@@ -123,7 +126,7 @@ for epoch in range(num_epochs):
     print(f'Epoch {epoch+1}/{num_epochs}, Loss: {running_loss/len(dataloader):.4f}, LR: {current_lr:.6f}, Time: {minutes}m{seconds}s')
     
 # Save the model
-torch.save(model.state_dict(), "models/trainv2_model_architecture_v2_epochs20.pth")
+torch.save(model.state_dict(), "models/trainv3_model_architecture_v2_epochs250.pth")
 
 with open("models/move_to_int_architecture_v2", "wb") as file:
     pickle.dump(move_to_int, file)

@@ -2,3 +2,4 @@
 /attempt_3/chess_env
 *.pth
 *.pgn
+*.npz
