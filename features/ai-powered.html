@@ -6,6 +6,11 @@
     <title>AI-Powered - ChessAI Project</title>
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .feature-detail-section {
+            margin-top: 100px;  /* Add margin to prevent header overlap */
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -22,9 +27,68 @@
 
     <main>
         <section class="feature-detail-section">
-            <h1>AI-Powered</h1>
+            <h1>AI-Powered Chess Engine</h1>
             <div class="feature-content">
-                <!-- Content coming soon -->
+                <div class="ai-model-section">
+                    <h2>SVM-Based Move Evaluation</h2>
+                    <p>Our chess engine utilizes a Support Vector Machine (SVM) model trained on a high-quality dataset of 16,000 games played by strong players (2000+ ELO rating). This extensive training on master-level games allows the model to learn sophisticated strategic patterns and tactical motifs.</p>
+                    <p>The SVM model evaluates positions using a sophisticated feature set including:</p>
+                    <ul class="feature-list">
+                        <li>Material balance and piece values</li>
+                        <li>Piece-square table evaluations</li>
+                        <li>Center control and mobility</li>
+                        <li>King safety metrics</li>
+                        <li>Pawn structure analysis</li>
+                    </ul>
+                </div>
+
+                <div class="ai-model-section">
+                    <h2>Deep Q-Learning Network (DQN)</h2>
+                    <p>Our DQN implementation combines deep reinforcement learning with traditional chess algorithms to create a powerful learning system. The model is trained through self-play and guided by advanced chess techniques:</p>
+                    <ul class="feature-list">
+                        <li><strong>Alpha-Beta Pruning:</strong> Efficiently explores the game tree by eliminating branches that cannot influence the final decision</li>
+                        <li><strong>Checkmate Search:</strong> Dedicated search algorithm to identify and execute winning combinations</li>
+                        <li><strong>Experience Replay:</strong> Stores and learns from past games to improve decision-making</li>
+                        <li><strong>Reward Shaping:</strong> Combines immediate rewards (material gain, check) with long-term strategic goals</li>
+                    </ul>
+                    <p>The training process includes:</p>
+                    <ul class="performance-metrics">
+                        <li>Self-play games with progressive difficulty</li>
+                        <li>Periodic evaluation against baseline engines</li>
+                        <li>Continuous policy improvement through experience replay</li>
+                        <li>Adaptive learning rates based on performance</li>
+                    </ul>
+                </div>
+
+                <div class="ai-model-section">
+                    <h2>GPU-Accelerated Performance</h2>
+                    <p>Our implementation takes advantage of GPU acceleration when available, providing:</p>
+                    <ul class="performance-metrics">
+                        <li>Faster move evaluation and selection</li>
+                        <li>Batch processing of multiple positions</li>
+                        <li>Real-time game analysis capabilities</li>
+                    </ul>
+                </div>
+
+                <div class="ai-model-section">
+                    <h2>Move Quality Analysis</h2>
+                    <p>The engine provides confidence scores for each move, allowing for:</p>
+                    <ul class="feature-list">
+                        <li>Transparent move selection process</li>
+                        <li>Multiple candidate move suggestions</li>
+                        <li>Position evaluation insights</li>
+                    </ul>
+                </div>
+
+                <div class="ai-model-section">
+                    <h2>Continuous Learning</h2>
+                    <p>The model can be continuously improved through:</p>
+                    <ul class="feature-list">
+                        <li>Training on new high-quality games</li>
+                        <li>Performance analysis and optimization</li>
+                        <li>Feature engineering and refinement</li>
+                    </ul>
+                </div>
             </div>
         </section>
     </main>

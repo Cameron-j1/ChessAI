@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results & Documentation - ChessAI Project</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .feature-detail-section {
+            margin-top: 100px;  /* Add margin to prevent header overlap */
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo"><a href="../index.html">ChessAI</a></div>
+            <ul class="nav-links">
+                <li><a href="../index.html#about">About</a></li>
+                <li><a href="../index.html#features">Features</a></li>
+                <li><a href="../index.html#demo">Demo</a></li>
+                <li><a href="../index.html#code">Code</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="feature-detail-section">
+            <h1>Results & Documentation</h1>
+            <div class="feature-content">
+                <div class="documentation-section">
+                    <h2>Technical Documentation</h2>
+                    <div class="doc-section">
+                        <h3>System Architecture</h3>
+                        <p>The ChessAI system consists of several key components:</p>
+                        <ul class="feature-list">
+                            <li><strong>Chess Engine Core:</strong> Implements the game logic and move generation</li>
+                            <li><strong>AI Models:</strong> SVM-based move evaluator and DQN for strategic decision making</li>
+                            <li><strong>Robotics Interface:</strong> Integration with UR3e robotic arm and custom hardware</li>
+                            <li><strong>Web Interface:</strong> User interaction and game visualization</li>
+                        </ul>
+                    </div>
+
+                    <div class="doc-section">
+                        <h3>Implementation Details</h3>
+                        <h4>Chess Engine</h4>
+                        <ul class="feature-list">
+                            <li>Move generation using bitboard representation</li>
+                            <li>Alpha-Beta pruning with iterative deepening</li>
+                            <li>Adaptive search depth based on position complexity</li>
+                            <li>Check extension and quiescence search</li>
+                        </ul>
+
+                        <h4>AI Components</h4>
+                        <ul class="feature-list">
+                            <li>SVM model trained on 16,000 high-quality games</li>
+                            <li>Feature engineering for position evaluation</li>
+                            <li>DQN implementation with experience replay</li>
+                            <li>Reward shaping for strategic learning</li>
+                        </ul>
+
+                        <h4>Robotics Integration</h4>
+                        <ul class="feature-list">
+                            <li>UR3e robotic arm control via ROS2</li>
+                            <li>Custom end effector design for piece movements</li>
+                            <li>Computer vision for board state detection</li>
+                            <li>Automated chess clock system with Custom GUI and Housing</li>
+                        </ul>
+                    </div>
+
+                    <div class="doc-section">
+                        <h3>API Documentation</h3>
+                        <p>Key interfaces and endpoints:</p>
+                        <ul class="feature-list">
+                            <li>Lichess API integration for online play</li>
+                            <li>Robotics Studio 2 API for arm control</li>
+                            <li>WebSocket interface for real-time game updates</li>
+                            <li>REST API for game state management</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="results-section">
+                    <h2>Project Results</h2>
+                    <div class="results-content">
+                        <div class="results-gallery">
+                            <div class="gallery-item">
+                                <h4>Performance Metrics</h4>
+                                <div class="image-placeholder">
+                                    <!-- Placeholder for performance metrics graph -->
+                                    <p>Image: Performance metrics and evaluation results</p>
+                                </div>
+                            </div>
+                            <div class="gallery-item">
+                                <h4>Training Results</h4>
+                                <div class="image-placeholder">
+                                    <!-- Placeholder for training results -->
+                                    <p>Image: Training progress and model accuracy</p>
+                                </div>
+                            </div>
+                            <div class="gallery-item">
+                                <h4>Game Statistics</h4>
+                                <div class="image-placeholder">
+                                    <!-- Placeholder for game statistics -->
+                                    <p>Image: Win rates and game analysis</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="results-text">
+                            <h3>Key Achievements</h3>
+                            <ul class="feature-list">
+                                <li>Successfully implemented and trained the SVM model</li>
+                                <li>Successfully implemented and trained the DQN model using the SVM Model</li>
+                                <li>Developed efficient move generation and evaluation</li>
+                                <li>Integrated with Lichess for online play</li>
+                                <li>Created a functional Chess Robot, allowing a user to play against the AI in real life.</li>
+                            </ul>
+
+                            <h3>Future Improvements</h3>
+                            <ul class="feature-list">
+                                <li>Improved robotic arm precision and speed</li>
+                                <li>Extended testing against stronger opponents</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 ChessAI Project - University of Technology Sydney. All rights reserved.</p>
+            <div class="social-links">
+                <a href="https://github.com/cameron-j1" target="_blank"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 
