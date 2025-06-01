@@ -18,6 +18,28 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border-left: 4px solid #27ae60;
         }
+        .future-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+            margin-top: 2rem;
+        }
+        .code-snippet {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 0.9em;
+        }
+        .code-reference {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -52,34 +74,180 @@
                     </div>
 
                     <div class="ai-model-section">
+                        <h2>Evolution to Spatial Move Prediction</h2>
+                        <p>We successfully evolved from categorical move prediction to a more intuitive spatial approach:</p>
+                        <ul class="feature-list">
+                            <li><strong>From Categorical to Spatial:</strong> Replaced the previous system of assigning numbers to moves with a more natural 8x8 board representation</li>
+                            <li><strong>Dual Output Heads:</strong> Implemented separate prediction heads for source and destination squares, making the model's output more analogous to the input</li>
+                            <li><strong>Improved Learning:</strong> The spatial representation allows the model to better understand and learn board relationships and piece movements</li>
+                        </ul>
+                        <div class="code-snippet">
+class ChessModelAttention(nn.Module):
+    def __init__(self, num_blocks=8, dropout_rate=0.2):
+        super(ChessModelAttention, self).__init__()
+        
+        # Increased width in the initial layers
+        self.input_conv = nn.Sequential(
+            nn.Conv2d(13, 384, kernel_size=3, padding=1),
+            nn.BatchNorm2d(384),
+            nn.ReLU(inplace=True),
+            nn.Dropout(dropout_rate)
+        )
+        
+        # Alternating residual and attention blocks
+        self.main_tower = nn.ModuleList()
+        for i in range(num_blocks):
+            self.main_tower.append(ResidualBlock(384))
+            self.main_tower.append(AttentionBlock(384, num_heads=8))
+        
+        # Move prediction heads with reduced width for final predictions
+        self.from_square_head = nn.Sequential(
+            nn.Conv2d(384, 128, kernel_size=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.Dropout2d(dropout_rate * 0.5),
+            nn.Conv2d(128, 32, kernel_size=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 1, kernel_size=1)
+        )
+        
+        self.to_square_head = nn.Sequential(
+            nn.Conv2d(384, 128, kernel_size=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.Dropout2d(dropout_rate * 0.5),
+            nn.Conv2d(128, 32, kernel_size=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 1, kernel_size=1)
+        )</div>
+                        <div class="code-reference">From attempt_3/chess_model_class_attention.py - Lines 89-134</div>
+                    </div>
+
+                    <div class="ai-model-section">
                         <h2>Attention-Based Neural Network</h2>
-                        <p>We successfully implemented a sophisticated attention-based neural network architecture that significantly improved move prediction accuracy:</p>
+                        <p>We successfully implemented a sophisticated attention-based neural network architecture inspired by Large Language Models:</p>
                         <ul class="feature-list">
-                            <li><strong>Multi-Head Board Attention:</strong> Implemented an 8-head attention mechanism that effectively captures complex board relationships</li>
+                            <li><strong>Multi-Head Board Attention:</strong> Implemented an 8-head attention mechanism that captures complex relationships between any squares on the board</li>
+                            <li><strong>Long-Range Understanding:</strong> Attention mechanism enables the model to understand complex chess concepts like forks, pins, and discovered attacks by connecting distant board positions</li>
                             <li><strong>Residual Learning:</strong> Deep network with 8 alternating residual and attention blocks for robust feature extraction</li>
-                            <li><strong>Spatial Move Prediction:</strong> Direct prediction of move source and destination squares using a 384-channel feature representation</li>
-                            <li><strong>Advanced Training:</strong> Successfully trained on 3.9M positions with cosine learning rate scheduling and gradient clipping</li>
+                            <li><strong>Overfitting Prevention:</strong> Implemented dropout (0.2) and weight decay (2e-4) to prevent the model from memorizing training data and ensure it learns core chess concepts</li>
                         </ul>
+                        <div class="code-snippet">
+class MultiHeadBoardAttention(nn.Module):
+    def __init__(self, channels, num_heads=8, head_dim=32, dropout=0.1):
+        super(MultiHeadBoardAttention, self).__init__()
+        self.num_heads = num_heads
+        self.head_dim = head_dim
+        self.scale = head_dim ** -0.5
+        
+        # Projections for Q, K, V
+        self.q_proj = nn.Conv2d(channels, num_heads * head_dim, 1)
+        self.k_proj = nn.Conv2d(channels, num_heads * head_dim, 1)
+        self.v_proj = nn.Conv2d(channels, num_heads * head_dim, 1)
+        self.out_proj = nn.Conv2d(num_heads * head_dim, channels, 1)
+        
+        self.dropout = nn.Dropout(dropout)
+    
+    def forward(self, x):
+        batch_size, _, H, W = x.shape
+        
+        # Project and reshape to (batch, heads, H*W, head_dim)
+        q = self.q_proj(x).view(batch_size, self.num_heads, self.head_dim, H*W).transpose(-2, -1)
+        k = self.k_proj(x).view(batch_size, self.num_heads, self.head_dim, H*W).transpose(-2, -1)
+        v = self.v_proj(x).view(batch_size, self.num_heads, self.head_dim, H*W).transpose(-2, -1)
+        
+        # Compute attention scores
+        attn = torch.matmul(q, k.transpose(-2, -1)) * self.scale
+        attn = F.softmax(attn, dim=-1)
+        attn = self.dropout(attn)
+        
+        # Apply attention to values
+        out = torch.matmul(attn, v)
+        
+        # Reshape back to board format
+        out = out.transpose(-2, -1).contiguous().view(batch_size, -1, H, W)
+        return self.out_proj(out)</div>
+                        <div class="code-reference">From attempt_3/chess_model_class_attention.py - Lines 6-45</div>
                     </div>
 
                     <div class="ai-model-section">
-                        <h2>Intelligent Move Evaluation System</h2>
-                        <p>The evaluation system successfully combines multiple strategies for move selection:</p>
+                        <h2>Advanced Training Process</h2>
+                        <p>The model was successfully trained on a carefully curated dataset:</p>
                         <ul class="feature-list">
-                            <li><strong>Checkmate Detection:</strong> Efficient search algorithm that extends depth for promising check sequences</li>
-                            <li><strong>X-Ray Analysis:</strong> Advanced piece relationship detection including discovered attacks and defenses</li>
-                            <li><strong>Move Validation:</strong> Comprehensive safety checks for candidate moves including piece vulnerability analysis</li>
-                            <li><strong>Position Evaluation:</strong> Sophisticated scoring system considering material, position, and tactical factors</li>
+                            <li><strong>High-Quality Data:</strong> Trained on 3.9M positions from master-level PGN games, supplemented with Stockfish analysis to ensure complete game coverage</li>
+                            <li><strong>Learning Rate Optimization:</strong> Implemented cosine learning rate scheduling for optimal convergence</li>
+                            <li><strong>Memory-Efficient Training:</strong> Successfully managed to train the large model within 32GB RAM constraints while maintaining model quality</li>
+                            <li><strong>Validation-Focused Training:</strong> Despite slower loss reduction, the model achieved better test performance through careful overfitting prevention</li>
                         </ul>
+                        <div class="code-snippet">
+def train_attention_model():
+    # Initialize the attention model
+    model = ChessModelAttention(num_blocks=8, dropout_rate=0.2).to(device)
+    criterion = SpatialMoveLoss()
+    
+    # Adjusted learning rate and weight decay for the attention model
+    initial_lr = 0.0005  # Reduced from 0.001 due to larger model
+    weight_decay = 2e-4  # Increased from 1e-4 for better regularization
+    optimizer = optim.AdamW(model.parameters(), lr=initial_lr, weight_decay=weight_decay)
+    
+    # Adjusted learning rate schedule
+    num_epochs = 100
+    scheduler = CosineAnnealingLR(optimizer, T_max=num_epochs, eta_min=1e-6)
+    
+    print(f"Training attention model with:")
+    print(f"- Batch size: {batch_size}")
+    print(f"- Initial learning rate: {initial_lr}")
+    print(f"- Weight decay: {weight_decay}")
+    print(f"- Dropout rate: 0.2")
+    print(f"- Number of blocks: 8")
+    print(f"- Model width: 384 channels")</div>
+                        <div class="code-reference">From attempt_3/train_spatial_attention.py - Lines 150-170</div>
                     </div>
 
                     <div class="ai-model-section">
-                        <h2>Move Quality Analysis</h2>
-                        <p>The engine successfully provides confidence scores for each move, allowing for:</p>
+                        <h2>Efficient Move Generation</h2>
+                        <p>The engine implements a streamlined move selection process:</p>
                         <ul class="feature-list">
-                            <li>Transparent move selection process</li>
-                            <li>Multiple candidate move suggestions</li>
-                            <li>Position evaluation insights</li>
+                            <li><strong>Fast Response Time:</strong> Moves are generated in under 0.2 seconds without position caching</li>
+                            <li><strong>Checkmate Priority:</strong> First searches for forced checkmate sequences before considering neural network moves</li>
+                            <li><strong>Smart Filtering:</strong> Neural network moves (95% of all moves) are filtered to prevent obvious blunders and checkmate threats</li>
+                            <li><strong>Direct Move Generation:</strong> The neural network directly outputs move probabilities without requiring complex evaluation functions</li>
+                        </ul>
+                        <div class="code-snippet">
+def get_model_move(self, board: chess.Board, move_num: int, is_white: bool, output_LAN: bool = False) -> Optional[str]:
+    # First check for checkmate sequences
+    checkmate_move = self.checkmate_search(board)
+    if checkmate_move:
+        return checkmate_move
+
+    # Get model's move probabilities
+    X_tensor = self.prepare_input(board)
+    with torch.no_grad():
+        probabilities = self.model(X_tensor.to(self.device))
+    
+    # Get legal moves and their probabilities
+    legal_moves = list(board.legal_moves)
+    move_probs = self._get_spatial_candidate_moves(probabilities, legal_moves)
+    
+    # Try moves in order of probability
+    for move, prob in move_probs:
+        if self._validate_and_check_move(board, move, 0, move_num, is_white, set()):
+            return move.uci()</div>
+                        <div class="code-reference">From attempt_3/evaluate.py - Lines 532-550</div>
+                    </div>
+                </div>
+
+                <div class="future-section">
+                    <h2>Future Improvements</h2>
+                    <div class="ai-model-section">
+                        <h3>Alpha-Beta Pruning Integration</h3>
+                        <p>Planned enhancements to improve move selection efficiency:</p>
+                        <ul class="feature-list">
+                            <li><strong>Value Head Addition:</strong> Add a position evaluation head to the neural network to enable efficient tree pruning</li>
+                            <li><strong>Hybrid Approach:</strong> Combine the neural network's move generation with alpha-beta pruning for deeper search capabilities</li>
+                            <li><strong>Optimized Search:</strong> Use the network's evaluation to guide the search tree, reducing the number of positions that need to be evaluated</li>
                         </ul>
                     </div>
                 </div>
