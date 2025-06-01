@@ -7,11 +7,12 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="scripts/lichess-stats.js" defer></script>
+    <script src="scripts/scroll-animations.js" defer></script>
 </head>
 <body>
     <header class="header">
         <nav class="nav-container">
-            <div class="logo">ChessAI</div>
+            <div class="logo"><a href="#hero">ChessAI</a></div>
             <ul class="nav-links">
                 <li><a href="#about">About</a></li>
                 <li><a href="#features">Features</a></li>
@@ -23,6 +24,14 @@
 
     <main>
         <section id="hero" class="hero-section">
+            <div class="floating-pieces">
+                <i class="fas fa-chess-king piece piece-1"></i>
+                <i class="fas fa-chess-queen piece piece-2"></i>
+                <i class="fas fa-chess-bishop piece piece-3"></i>
+                <i class="fas fa-chess-knight piece piece-4"></i>
+                <i class="fas fa-chess-rook piece piece-5"></i>
+                <i class="fas fa-chess-pawn piece piece-6"></i>
+            </div>
             <div class="hero-content">
                 <h1>ChessAI Project</h1>
                 <p>University of Technology Sydney</p>
