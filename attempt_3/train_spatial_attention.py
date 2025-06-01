@@ -13,7 +13,7 @@ import gc
 
 from other_functions import create_input_for_nn, encode_moves_spatial
 from dataset_class import ChessDatasetSpatial
-from chess_model_class import ChessModelSpatial
+from chess_model_class_attention import ChessModelAttention  # Changed import
 
 
 def load_pgn(file_path):
@@ -62,9 +62,9 @@ class SpatialMoveLoss(nn.Module):
         return total_loss
 
 
-def train_spatial_model():
-    """Train the spatial chess model with simplified data loading matching train.py"""
-    print("Setting up training with simplified data loading...")
+def train_attention_model():
+    """Train the attention-enhanced chess model with spatial move prediction"""
+    print("Setting up training for attention-enhanced model...")
     
     # Check if npz directory exists and look for spatial training data files
     npz_dir = "./npz"
@@ -173,35 +173,41 @@ def train_spatial_model():
 
     # Create Dataset and DataLoader
     dataset = ChessDatasetSpatial(X, y_spatial)
-    batch_size = 512
+    
+    # Adjusted batch size for the larger model
+    batch_size = 256  # Reduced from 512 due to larger model size
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     
     # Check for GPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f'Using device: {device}')
     
-    # Model Initialization with dropout for regularization
-    model = ChessModelSpatial(dropout_rate=0.2).to(device)
+    # Initialize the attention model
+    model = ChessModelAttention(num_blocks=8, dropout_rate=0.2).to(device)
     criterion = SpatialMoveLoss()
     
-    # Initialize optimizer with weight decay for regularization
-    initial_lr = 0.001
-    weight_decay = 1e-4  # L2 regularization
-    optimizer = optim.Adam(model.parameters(), lr=initial_lr, weight_decay=weight_decay)
+    # Adjusted learning rate and weight decay for the attention model
+    initial_lr = 0.0005  # Reduced from 0.001 due to larger model
+    weight_decay = 2e-4  # Increased from 1e-4 for better regularization
+    optimizer = optim.AdamW(model.parameters(), lr=initial_lr, weight_decay=weight_decay)
     
-    # Add cosine annealing scheduler
-    num_epochs = 100  # Increased for actual training
+    # Adjusted learning rate schedule
+    num_epochs = 100
     scheduler = CosineAnnealingLR(optimizer, T_max=num_epochs, eta_min=1e-6)
     
-    print(f"Training with batch size: {batch_size}, initial learning rate: {initial_lr}")
-    print(f"Using dropout rate: 0.2 and weight decay: {weight_decay}")
-    print(f"Model output shape: (batch_size, 2, 8, 8) - spatial move representation")
+    print(f"Training attention model with:")
+    print(f"- Batch size: {batch_size}")
+    print(f"- Initial learning rate: {initial_lr}")
+    print(f"- Weight decay: {weight_decay}")
+    print(f"- Dropout rate: 0.2")
+    print(f"- Number of blocks: 8")
+    print(f"- Model width: 384 channels")
     
     for epoch in range(num_epochs):
         start_time = time.time()
         model.train()
         running_loss = 0.0
-        batch_count = 0  # Initialize batch_count
+        batch_count = 0
         
         try:
             progress_bar = tqdm(dataloader, desc=f'Epoch {epoch+1}/{num_epochs}')
@@ -243,14 +249,14 @@ def train_spatial_model():
         
         end_time = time.time()
         epoch_time = end_time - start_time
-        minutes: int = int(epoch_time // 60)
-        seconds: int = int(epoch_time) - minutes * 60
+        minutes = int(epoch_time // 60)
+        seconds = int(epoch_time) - minutes * 60
         avg_loss = running_loss / batch_count if batch_count > 0 else 0
         print(f'Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}, LR: {current_lr:.6f}, Time: {minutes}m{seconds}s')
         
         # Save checkpoint every epoch for the first few epochs, then every 5
         if epoch < 2 or (epoch + 1) % 5 == 0:
-            checkpoint_path = f"models/spatial_model_dropout_checkpoint_epoch_{epoch+1}.pth"
+            checkpoint_path = f"models/attention_model_checkpoint_epoch_{epoch+1}.pth"
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
@@ -260,14 +266,14 @@ def train_spatial_model():
             print(f"Checkpoint saved: {checkpoint_path}")
     
     # Save the final model
-    final_model_path = "models/v5_spatial_model_100epochs.pth"
+    final_model_path = "models/v1_attention_model_100epochs.pth"
     torch.save(model.state_dict(), final_model_path)
     
     print(f"Training completed! Final model saved as {final_model_path}")
-    print("This model uses spatial move encoding (2x8x8 channels) instead of categorical encoding.")
+    print("This model uses attention mechanisms and spatial move encoding.")
 
 
 if __name__ == "__main__":
     # Create models directory if it doesn't exist
     os.makedirs("models", exist_ok=True)
-    train_spatial_model() 
+    train_attention_model() 

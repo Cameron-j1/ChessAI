@@ -20,9 +20,10 @@ class ChessGUI:
         self.board = chess.Board()
         
         # Initialize the AI
-        model_path = 'models/trainv3_model_architecture_v2_epochs250.pth'
-        mapping_path = 'models/move_to_int_architecture_v2'
-        self.ai = ChessEvaluator(model_path, mapping_path)
+        model_path = 'models/spatial_model_checkpoint_epoch_15.pth'
+        # mapping_path = 'models/move_to_int_architecture_v2'
+        mapping_path = None
+        self.ai = ChessEvaluator(model_path, mapping_path, model_type='spatial')
         
         # Create main frame
         self.main_frame = ttk.Frame(root, padding="20")

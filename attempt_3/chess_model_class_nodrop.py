@@ -49,7 +49,6 @@ class ChessModelSpatial(nn.Module):
             nn.Conv2d(256, 64, kernel_size=1),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-            nn.Dropout2d(dropout_rate * 0.5),  # Lighter dropout in heads
             nn.Conv2d(64, 16, kernel_size=1),
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
@@ -60,7 +59,6 @@ class ChessModelSpatial(nn.Module):
             nn.Conv2d(256, 64, kernel_size=1),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-            nn.Dropout2d(dropout_rate * 0.5),  # Lighter dropout in heads
             nn.Conv2d(64, 16, kernel_size=1),
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),

@@ -5,7 +5,9 @@ import numpy as np
 import pickle
 from pathlib import Path
 from typing import Tuple, Optional, List
-from chess_model_class import ChessModel, ChessModelSpatial
+# Import models conditionally based on model type
+from chess_model_class import ChessModel, ChessModelSpatial as ChessModelSpatialBase
+from chess_model_class_attention import ChessModelAttention
 from other_functions import board_to_matrix, decode_move_spatial
 import random
 import time
@@ -17,12 +19,12 @@ VERBOSE = False
 class ChessEvaluator:
     def __init__(self, model_path: str, mapping_path: str = None, model_type: str = "categorical"):
         """
-        Initialize ChessEvaluator with support for both categorical and spatial models.
+        Initialize ChessEvaluator with support for categorical, spatial, and attention models.
         
         Args:
             model_path: Path to the model file
             mapping_path: Path to move mapping file (only needed for categorical models)
-            model_type: Either "categorical" or "spatial"
+            model_type: Either "categorical", "spatial", or "attention"
         """
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model_type = model_type
@@ -42,7 +44,21 @@ class ChessEvaluator:
             
         elif model_type == "spatial":
             # Load spatial model (no move mappings needed)
-            self.model = ChessModelSpatial()
+            self.model = ChessModelSpatialBase()
+            # Load checkpoint and extract model state dict
+            checkpoint = torch.load(model_path, map_location=self.device)
+            if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
+                # If it's a training checkpoint, extract just the model state dict
+                self.model.load_state_dict(checkpoint['model_state_dict'])
+            else:
+                # If it's already a state dict, load it directly
+                self.model.load_state_dict(checkpoint)
+            self.move_to_int = None
+            self.int_to_move = None
+            
+        elif model_type == "attention":
+            # Load attention model (no move mappings needed)
+            self.model = ChessModelAttention()
             # Load checkpoint and extract model state dict
             checkpoint = torch.load(model_path, map_location=self.device)
             if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
@@ -55,7 +71,7 @@ class ChessEvaluator:
             self.int_to_move = None
             
         else:
-            raise ValueError("model_type must be either 'categorical' or 'spatial'")
+            raise ValueError("model_type must be either 'categorical', 'spatial', or 'attention'")
         
         self.model.to(self.device)
         self.model.eval()
@@ -516,7 +532,26 @@ class ChessEvaluator:
     def get_model_move(self, board: chess.Board, move_num: int, is_white: bool, output_LAN: bool = False) -> Optional[str]:
         # First check for checkmate sequences
         board.turn_at_start = board.turn  # Add this attribute for the search
-        checkmate_move = self.checkmate_search(board)
+        
+        check_extensions = 8
+        
+        # Count total pieces on the board
+        total_pieces = len(list(board.pieces(chess.PAWN, chess.WHITE))) + len(list(board.pieces(chess.PAWN, chess.BLACK))) + \
+                      len(list(board.pieces(chess.KNIGHT, chess.WHITE))) + len(list(board.pieces(chess.KNIGHT, chess.BLACK))) + \
+                      len(list(board.pieces(chess.BISHOP, chess.WHITE))) + len(list(board.pieces(chess.BISHOP, chess.BLACK))) + \
+                      len(list(board.pieces(chess.ROOK, chess.WHITE))) + len(list(board.pieces(chess.ROOK, chess.BLACK))) + \
+                      len(list(board.pieces(chess.QUEEN, chess.WHITE))) + len(list(board.pieces(chess.QUEEN, chess.BLACK))) + \
+                      len(list(board.pieces(chess.KING, chess.WHITE))) + len(list(board.pieces(chess.KING, chess.BLACK)))
+        
+        # Extend search depth in endgame positions
+        base_depth = 3
+        if total_pieces <= 10:  # Endgame with 10 or fewer pieces
+            base_depth = 4  # Base depth + 8 as requested
+            check_extensions = 9
+            if VERBOSE:
+                print(f"Endgame position detected ({total_pieces} pieces). Extending checkmate search depth to {base_depth}.")
+        
+        checkmate_move = self.checkmate_search(board, depth=base_depth, max_depth=check_extensions)
         if checkmate_move:
             # If it's a promotion move, ensure it promotes to queen
             if len(checkmate_move) == 5:  # Promotion moves are 5 characters long
@@ -559,8 +594,8 @@ class ChessEvaluator:
                             return board.lan(move_obj)
                         return move
             
-        elif self.model_type == "spatial":
-            # Handle spatial model
+        elif self.model_type in ["spatial", "attention"]:  # Handle both spatial and attention models the same way
+            # Handle spatial/attention model
             logits = logits.squeeze(0)  # Shape: (2, 8, 8)
             
             # Apply softmax to convert logits to probabilities
@@ -944,31 +979,31 @@ def main():
     mode = 'stockfish'
     
     # Model configuration
-    # model_type = 'categorical'  # 'categorical' or 'spatial'
+    # model_type = 'categorical'  # 'categorical', 'spatial', or 'attention'
     # model_path = 'models/trainv3_model_architecture_v2_epochs250.pth'  # Path to your main model
     # mapping_path = "models/move_to_int_architecture_v2"  # Only needed for categorical models
     
-    # For spatial models, use these instead:
-    model_type = 'spatial'
-    model_path = 'models/spatial_model_checkpoint_epoch_10.pth'
-    mapping_path = None  # Not needed for spatial models
+    # For spatial/attention models, use these instead:
+    model_type = 'attention'  # Choose between 'spatial' or 'attention'
+    model_path = 'models/attention_model_checkpoint_epoch_10.pth'  # Path to your model
+    mapping_path = None  # Not needed for spatial/attention models
     
     opponent_model_path = 'models/trainv3_model_architecture_v2_epochs250.pth'  # Path to opponent model (for mode='model')
-    opponent_model_type = 'categorical'  # Type of opponent model
+    opponent_model_type = 'categorical'  # Type of opponent model ('categorical', 'spatial', or 'attention')
     opponent_mapping_path = "models/move_to_int_architecture_v2"  # Mapping for opponent model (if categorical)
     
     stockfish_path = '/usr/games/stockfish'  # Path to stockfish executable (for mode='stockfish')
-    stockfish_elo = 1500  # Stockfish ELO rating (only used for opponent, not for statistics)
+    stockfish_elo = 1350  # Stockfish ELO rating (only used for opponent, not for statistics)
     num_games = 100  # Number of games to play
     time_limit = 0.01  # Time limit per move for Stockfish (in seconds)
     
     # Initialize main model
     if model_type == 'categorical':
         main_model = ChessEvaluator(model_path, mapping_path, model_type='categorical')
-    elif model_type == 'spatial':
-        main_model = ChessEvaluator(model_path, model_type='spatial')
+    elif model_type in ['spatial', 'attention']:
+        main_model = ChessEvaluator(model_path, model_type=model_type)
     else:
-        raise ValueError("model_type must be either 'categorical' or 'spatial'")
+        raise ValueError("model_type must be either 'categorical', 'spatial', or 'attention'")
     
     print(f"Loaded {model_type} model from {model_path}")
     
@@ -989,10 +1024,10 @@ def main():
         
         if opponent_model_type == 'categorical':
             opponent_model = ChessEvaluator(opponent_model_path, opponent_mapping_path, model_type='categorical')
-        elif opponent_model_type == 'spatial':
-            opponent_model = ChessEvaluator(opponent_model_path, model_type='spatial')
+        elif opponent_model_type in ['spatial', 'attention']:
+            opponent_model = ChessEvaluator(opponent_model_path, model_type=opponent_model_type)
         else:
-            raise ValueError("opponent_model_type must be either 'categorical' or 'spatial'")
+            raise ValueError("opponent_model_type must be either 'categorical', 'spatial', or 'attention'")
             
         stats = play_game(main_model, opponent_model, num_games)
         opponent_desc = f"Opponent Model ({opponent_model_type})"
@@ -1005,7 +1040,7 @@ def main():
         if VERBOSE:
             print(f"\nEvaluating against Stockfish (ELO: {stockfish_elo})...")
         engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
-        engine.configure({"UCI_LimitStrength": stockfish_elo})  # Approximate ELO to skill level
+        engine.configure({"UCI_LimitStrength": True, "UCI_Elo": stockfish_elo})  # Set ELO rating
         
         stats = play_game(main_model, engine, num_games)
         engine.quit()
