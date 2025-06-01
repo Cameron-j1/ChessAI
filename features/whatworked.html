@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Worked - ChessAI Project</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../scripts/scroll-animations.js" defer></script>
+    <style>
+        .feature-detail-section {
+            margin-top: 100px;
+        }
+        .success-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo"><a href="../index.html">ChessAI</a></div>
+            <ul class="nav-links">
+                <li><a href="../index.html#about">About</a></li>
+                <li><a href="../index.html#features">Features</a></li>
+                <li><a href="../index.html#demo">Demo</a></li>
+                <li><a href="../index.html#code">Code</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="feature-detail-section">
+            <h1>What Worked</h1>
+            <div class="feature-content">
+                <div class="success-section">
+                    <div class="ai-model-section">
+                        <h2>SVM-Based Move Evaluation</h2>
+                        <p>Our chess engine successfully implemented a Support Vector Machine (SVM) model trained on a high-quality dataset of 16,000 games played by strong players (2000+ ELO rating). This extensive training on master-level games allowed the model to learn sophisticated strategic patterns and tactical motifs.</p>
+                        <p>The SVM model effectively evaluates positions using a sophisticated feature set including:</p>
+                        <ul class="feature-list">
+                            <li>Material balance and piece values</li>
+                            <li>Piece-square table evaluations</li>
+                            <li>Center control and mobility</li>
+                            <li>King safety metrics</li>
+                            <li>Pawn structure analysis</li>
+                        </ul>
+                    </div>
+
+                    <div class="ai-model-section">
+                        <h2>Attention-Based Neural Network</h2>
+                        <p>We successfully implemented a sophisticated attention-based neural network architecture that significantly improved move prediction accuracy:</p>
+                        <ul class="feature-list">
+                            <li><strong>Multi-Head Board Attention:</strong> Implemented an 8-head attention mechanism that effectively captures complex board relationships</li>
+                            <li><strong>Residual Learning:</strong> Deep network with 8 alternating residual and attention blocks for robust feature extraction</li>
+                            <li><strong>Spatial Move Prediction:</strong> Direct prediction of move source and destination squares using a 384-channel feature representation</li>
+                            <li><strong>Advanced Training:</strong> Successfully trained on 3.9M positions with cosine learning rate scheduling and gradient clipping</li>
+                        </ul>
+                    </div>
+
+                    <div class="ai-model-section">
+                        <h2>Intelligent Move Evaluation System</h2>
+                        <p>The evaluation system successfully combines multiple strategies for move selection:</p>
+                        <ul class="feature-list">
+                            <li><strong>Checkmate Detection:</strong> Efficient search algorithm that extends depth for promising check sequences</li>
+                            <li><strong>X-Ray Analysis:</strong> Advanced piece relationship detection including discovered attacks and defenses</li>
+                            <li><strong>Move Validation:</strong> Comprehensive safety checks for candidate moves including piece vulnerability analysis</li>
+                            <li><strong>Position Evaluation:</strong> Sophisticated scoring system considering material, position, and tactical factors</li>
+                        </ul>
+                    </div>
+
+                    <div class="ai-model-section">
+                        <h2>Move Quality Analysis</h2>
+                        <p>The engine successfully provides confidence scores for each move, allowing for:</p>
+                        <ul class="feature-list">
+                            <li>Transparent move selection process</li>
+                            <li>Multiple candidate move suggestions</li>
+                            <li>Position evaluation insights</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 ChessAI Project - University of Technology Sydney. All rights reserved.</p>
+            <div class="social-links">
+                <a href="https://github.com/cameron-j1" target="_blank"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 

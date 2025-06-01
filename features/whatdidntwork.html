@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Didn't Work - ChessAI Project</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../scripts/scroll-animations.js" defer></script>
+    <style>
+        .feature-detail-section {
+            margin-top: 100px;
+        }
+        .failure-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo"><a href="../index.html">ChessAI</a></div>
+            <ul class="nav-links">
+                <li><a href="../index.html#about">About</a></li>
+                <li><a href="../index.html#features">Features</a></li>
+                <li><a href="../index.html#demo">Demo</a></li>
+                <li><a href="../index.html#code">Code</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="feature-detail-section">
+            <h1>What Didn't Work</h1>
+            <div class="feature-content">
+                <div class="failure-section">
+                    <div class="ai-model-section">
+                        <h2>Deep Q-Learning Network (DQN)</h2>
+                        <p>Our DQN implementation faced several challenges:</p>
+                        <ul class="feature-list">
+                            <li><strong>Training Complexity:</strong> The model struggled to converge due to the complexity of chess state space</li>
+                            <li><strong>Alpha-Beta Integration:</strong> Difficulties in effectively combining Alpha-Beta pruning with the DQN architecture</li>
+                            <li><strong>Checkmate Search:</strong> The dedicated search algorithm for winning combinations proved less effective than traditional methods</li>
+                            <li><strong>Experience Replay:</strong> Memory management issues with storing and learning from past games</li>
+                            <li><strong>Reward Shaping:</strong> Challenges in balancing immediate rewards with long-term strategic goals</li>
+                        </ul>
+                        <p>The training process encountered issues with:</p>
+                        <ul class="performance-metrics">
+                            <li>Inconsistent performance in self-play games</li>
+                            <li>Difficulty in maintaining stable learning rates</li>
+                            <li>Limited improvement against baseline engines</li>
+                            <li>Computational resource constraints</li>
+                        </ul>
+                    </div>
+
+                    <div class="ai-model-section">
+                        <h2>Continuous Learning</h2>
+                        <p>The model faced challenges in continuous improvement through:</p>
+                        <ul class="feature-list">
+                            <li>Limited success in incorporating new high-quality games</li>
+                            <li>Performance degradation over time</li>
+                            <li>Feature engineering complexity</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 ChessAI Project - University of Technology Sydney. All rights reserved.</p>
+            <div class="social-links">
+                <a href="https://github.com/cameron-j1" target="_blank"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 
