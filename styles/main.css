@@ -142,17 +142,45 @@ section h2 {
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     text-align: center;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
 }
 
 .feature-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    border-color: var(--secondary-color);
 }
 
 .feature-card i {
     font-size: 2.5rem;
     color: var(--secondary-color);
     margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover i {
+    transform: scale(1.1);
+}
+
+.feature-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    transition: color 0.3s ease;
+}
+
+.feature-card:hover h3 {
+    color: var(--secondary-color);
+}
+
+.feature-card p {
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+.feature-card:hover p {
+    color: #444;
 }
 
 /* Feature Detail Pages */
@@ -647,5 +675,62 @@ section h2 {
     
     .robotics-integration {
         padding: 1rem;
+    }
+}
+
+/* Robotics Integration Box Styles */
+.robotics-integration-box {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin: 2rem auto;
+    max-width: 1200px;
+    padding: 2rem;
+    background: linear-gradient(145deg, #f8f9fa, #ffffff);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.robotics-feature {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    cursor: default;
+}
+
+.robotics-feature:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.robotics-feature i {
+    font-size: 2.5rem;
+    color: #3498db;
+    margin-bottom: 1rem;
+}
+
+.robotics-feature h5 {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+}
+
+.robotics-feature p {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    .robotics-integration-box {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+    
+    .robotics-feature {
+        padding: 1.5rem;
     }
 } 
