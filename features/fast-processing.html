@@ -47,18 +47,18 @@
                 </div>
 
                 <div class="feature-section">
-                    <h2>Alpha-Beta Pruning</h2>
-                    <p>Our implementation of Alpha-Beta pruning significantly reduces the number of positions that need to be evaluated:</p>
+                    <h2>Efficient Move Generation</h2>
+                    <p>Our engine prioritizes quick and effective move generation:</p>
                     <ul class="feature-list">
-                        <li><strong>Branch Elimination:</strong> Efficiently cuts off branches that cannot influence the final decision</li>
-                        <li><strong>Move Ordering:</strong> Prioritizes promising moves to maximize pruning effectiveness</li>
-                        <li><strong>Performance Impact:</strong> Reduces the search space by approximately 50-70% compared to full minimax search</li>
+                        <li><strong>Checkmate Detection:</strong> Immediate response to checkmate opportunities</li>
+                        <li><strong>Move Filtering:</strong> Intelligent filtering of neural network moves to prevent blunders</li>
+                        <li><strong>Performance Impact:</strong> Average response time under 0.2 seconds per move</li>
                     </ul>
                     <p>Key optimizations include:</p>
                     <ul class="feature-list">
-                        <li>Transposition tables to cache previously evaluated positions</li>
-                        <li>Iterative deepening for progressive search depth</li>
-                        <li>Quiescence search to handle tactical positions</li>
+                        <li>Efficient board representation for quick move generation</li>
+                        <li>Prioritized move ordering based on piece values</li>
+                        <li>Quick evaluation of tactical positions</li>
                     </ul>
                 </div>
 
@@ -66,7 +66,7 @@
                     <h2>Computational Efficiency</h2>
                     <p>The engine is designed to maintain consistent performance across different game phases:</p>
                     <ul class="feature-list">
-                        <li>Average move generation time under 2 seconds</li>
+                        <li>Average move generation time under 0.2 seconds</li>
                         <li>Dynamic depth adjustment based on position complexity</li>
                         <li>Efficient memory usage through position caching</li>
                     </ul>
