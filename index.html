@@ -6,6 +6,7 @@
     <title>ChessAI Project Portfolio</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="scripts/lichess-stats.js" defer></script>
 </head>
 <body>
     <header class="header">
@@ -80,13 +81,9 @@
                 <div class="bot-stats">
                     <h3>Bot Statistics</h3>
                     <div class="lichess-embed">
-                        <script src="https://lichess.org/embed/AI_in_robo_engine?theme=auto"></script>
-                        <div class="stats-info">
-                            <p>View full statistics and game history on the bot's profile:</p>
-                            <a href="https://lichess.org/@/AI_in_robo_engine" target="_blank" class="lichess-profile-link">
-                                <i class="fas fa-chess-knight"></i>
-                                View Full Profile
-                            </a>
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading bot statistics...</p>
                         </div>
                     </div>
                 </div>
