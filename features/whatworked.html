@@ -152,6 +152,16 @@
                             </ul>
                         </div>
                         
+                        <div class="flowchart-step" style="border-top: 4px solid #c53030;">
+                            <h3><i class="fas fa-times-circle"></i> Failed Attempt: Deep Q-Learning</h3>
+                            <ul>
+                                <li>Attempted DQN implementation</li>
+                                <li>Faced training complexity issues</li>
+                                <li>Struggled with reward shaping</li>
+                                <li>Abandoned due to poor performance</li>
+                            </ul>
+                        </div>
+                        
                         <div class="flowchart-step">
                             <h3><i class="fas fa-chess-board"></i> Phase 2: Spatial Move Prediction</h3>
                             <ul>
@@ -179,16 +189,6 @@
                                 <li>Implemented cosine learning rate scheduling</li>
                                 <li>Optimized memory usage</li>
                                 <li>Balanced memorization and generalization</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="flowchart-step">
-                            <h3><i class="fas fa-rocket"></i> Phase 5: Move Generation and Evaluation</h3>
-                            <ul>
-                                <li>Implemented checkmate detection</li>
-                                <li>Developed move filtering system</li>
-                                <li>Achieved sub-0.2s response time</li>
-                                <li>Balanced accuracy and efficiency</li>
                             </ul>
                         </div>
                     </div>
@@ -277,37 +277,6 @@ def train_attention_model():
     # Cosine learning rate schedule for optimal convergence
     scheduler = CosineAnnealingLR(optimizer, T_max=100, eta_min=1e-6)</div>
                         <div class="code-reference">From attempt_3/train_spatial_attention.py - Training configuration showing our optimization approach</div>
-                    </div>
-
-                    <div class="ai-model-section">
-                        <h2>Phase 5: Move Generation and Evaluation</h2>
-                        <p>Our final implementation focused on efficient move generation:</p>
-                        <ul class="feature-list">
-                            <li><strong>Checkmate Detection:</strong> Implemented priority-based checkmate search</li>
-                            <li><strong>Move Filtering:</strong> Developed a system to filter neural network moves and prevent blunders</li>
-                            <li><strong>Performance Optimization:</strong> Achieved sub-0.2 second response times</li>
-                            <li><strong>Key Learning:</strong> Learned to balance between tactical accuracy and computational efficiency</li>
-                        </ul>
-                        <div class="code-snippet">
-def get_model_move(self, board: chess.Board, move_num: int, is_white: bool) -> Optional[str]:
-    # Priority-based move selection
-    checkmate_move = self.checkmate_search(board)
-    if checkmate_move:
-        return checkmate_move
-
-    # Neural network move generation with filtering
-    X_tensor = self.prepare_input(board)
-    with torch.no_grad():
-        probabilities = self.model(X_tensor.to(self.device))
-    
-    # Smart move filtering and validation
-    legal_moves = list(board.legal_moves)
-    move_probs = self._get_spatial_candidate_moves(probabilities, legal_moves)
-    
-    for move, prob in move_probs:
-        if self._validate_and_check_move(board, move, 0, move_num, is_white, set()):
-            return move.uci()</div>
-                        <div class="code-reference">From attempt_3/evaluate.py - Move generation showing our final implementation</div>
                     </div>
                 </div>
 
