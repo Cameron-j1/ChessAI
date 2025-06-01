@@ -19,11 +19,11 @@ class ChessGUI:
         # Initialize the board
         self.board = chess.Board()
         
-        # Initialize the AI
-        model_path = 'models/spatial_model_checkpoint_epoch_15.pth'
-        # mapping_path = 'models/move_to_int_architecture_v2'
-        mapping_path = None
-        self.ai = ChessEvaluator(model_path, mapping_path, model_type='spatial')
+        # Initialize the AI - modify to fit whatever AI you want to test
+        model_path = 'models/attention_model_checkpoint_epoch_10.pth'
+        # mapping_path = 'models/move_to_int_architecture_v2' #categorical models need a mapping path
+        mapping_path = None #spatial and attention models don't need a mapping path
+        self.ai = ChessEvaluator(model_path, mapping_path, model_type='attention') #'spatial', 'attention', 'categorical'
         
         # Create main frame
         self.main_frame = ttk.Frame(root, padding="20")

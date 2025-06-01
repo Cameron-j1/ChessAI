@@ -31,8 +31,7 @@ LIMIT_OF_FILES = min(len(files), 28)
 # Estimate number of positions per game (average)
 POSITIONS_PER_GAME = 105  # Chess games average about 70 moves
 TARGET_POSITIONS = 2000000  # The number of positions we want
-# TARGET_POSITIONS = 1500000  # The number of positions we want
-ESTIMATED_GAMES_NEEDED = TARGET_POSITIONS // POSITIONS_PER_GAME
+ESTIMATED_GAMES_NEEDED = TARGET_POSITIONS / POSITIONS_PER_GAME
 
 # Load only the estimated number of games needed
 games = []
@@ -75,9 +74,9 @@ print("Training data saved successfully!")
 X = torch.tensor(X, dtype=torch.float32)
 y_spatial = torch.tensor(y_spatial, dtype=torch.float32)
 
-# Create Dataset and DataLoader with larger batch size
+# Create Dataset and DataLoader
 dataset = ChessDatasetSpatial(X, y_spatial)
-batch_size = 768  # Increased from 64
+batch_size = 768 
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
 
 

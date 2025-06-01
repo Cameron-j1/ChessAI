@@ -13,16 +13,13 @@ A PyTorch-based chess AI that uses deep learning to predict moves from board pos
 
 1. Create a virtual environment:
 ```bash
-python -m venv chess_ai_env
+python3 -m venv chess_ai_env
 ```
 
 2. Activate the virtual environment:
 ```bash
 # On Linux/Mac:
 source chess_ai_env/bin/activate
-
-# On Windows:
-chess_ai_env\Scripts\activate
 ```
 
 3. Install system dependencies:
@@ -46,7 +43,7 @@ The project expects PGN (Portable Game Notation) files to be placed in the root 
 Before training, PGN files need to be processed to ensure all games have proper endings:
 
 ```bash
-python pgn_process.py
+python3 pgn_process.py
 ```
 
 **What `pgn_process.py` does:**
@@ -71,12 +68,12 @@ Processed training data is stored in the `npz/` directory:
 
 ## Training Models
 
-### 1. Spatial Attention Model (`train_spatial_attention.py`)
+### 1. Spatial Attention Model (`train_spatial_attention.py`) - OPTIMAL
 
 Trains an attention-enhanced CNN model with spatial move representation:
 
 ```bash
-python train_spatial_attention.py
+python3 train_spatial_attention.py
 ```
 
 **Features:**
@@ -90,12 +87,12 @@ python train_spatial_attention.py
 
 **Output:** Saves model checkpoints in `models/` as `attention_model_checkpoint_epoch_X.pth`
 
-### 2. Spatial CNN Model (`train_spatial.py`)
+### 2. Spatial CNN Model (`train_spatial.py`) - SUBOPTIMAL
 
 Trains a spatial CNN model using the `ChessModelSpatial` architecture:
 
 ```bash
-python train_spatial.py
+python3 train_spatial.py
 ```
 
 **Features:**
@@ -108,12 +105,12 @@ python train_spatial.py
 
 **Output:** Saves model checkpoints in `models/` as `spatial_model_checkpoint_epoch_X.pth`
 
-### 3. Alternative Training (`train.py`)
+### 3. Alternative Training (`train.py`) - SUBOPTIMAL
 
 Basic training script for categorical move prediction:
 
 ```bash
-python train.py
+python3 train.py
 ```
 
 **Features:**
@@ -153,7 +150,7 @@ python train.py
 Comprehensive evaluation script supporting multiple model types:
 
 ```bash
-python evaluate.py
+python3 evaluate.py
 ```
 
 **Supported Model Types:**
@@ -181,7 +178,7 @@ python evaluate.py
 Interactive GUI for playing against the AI:
 
 ```bash
-python play_human.py
+python3 play_human.py
 ```
 
 **Features:**
@@ -250,9 +247,9 @@ Trained models are stored in the `models/` directory:
 
 ## Tips and Best Practices
 
-1. **Training:** Start with spatial attention models as they perform best
+1. **Training:** use spatial attention models as they perform the best
 2. **Data:** Use high-quality games (rating > 2000) for better training results
-3. **Memory:** Monitor RAM usage during training; reduce positions loaded if needed
+3. **Memory:** Monitor RAM usage when loading data in for training; reduce positions loaded if needed
 4. **Evaluation:** Test models against multiple opponents for robust evaluation
 5. **Checkpoints:** Keep multiple epoch checkpoints as later epochs may overfit
 

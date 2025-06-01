@@ -84,7 +84,7 @@ class ChessEvaluator:
     def checkmate_search(self, board: chess.Board, depth: int = 3, max_depth: int = 8) -> Optional[str]:
         """
         Search for a checkmate sequence with depth extension for checks.
-        Base depth is 2 moves, but will extend up to max_depth if checks are found.
+        Base depth is 3 moves, but will extend up to max_depth if checks continue.
         Returns the first move of a checkmate sequence if found, otherwise None.
         """
         # Check immediate checkmates first
@@ -974,9 +974,10 @@ def play_game(white_player, black_player, num_games: int = 1) -> Tuple[int, int,
             avg_cpl_model, avg_cpl_stockfish)
 
 def main():
-    # Configuration variables - modify these as needed
-    # mode = 'model'
-    mode = 'stockfish'
+    # Configuration variables - uncomment 1 of the 3 modes to be the opponent
+    # mode = 'model' #used if you want to play against another trained model
+    mode = 'stockfish' #used if you want to play against stockfish
+    # mode = 'random' #used if you want to play against random moves
     
     # Model configuration
     # model_type = 'categorical'  # 'categorical', 'spatial', or 'attention'
@@ -988,14 +989,19 @@ def main():
     model_path = 'models/attention_model_checkpoint_epoch_10.pth'  # Path to your model
     mapping_path = None  # Not needed for spatial/attention models
     
+    
+    # Opponent model configuration
     opponent_model_path = 'models/trainv3_model_architecture_v2_epochs250.pth'  # Path to opponent model (for mode='model')
     opponent_model_type = 'categorical'  # Type of opponent model ('categorical', 'spatial', or 'attention')
     opponent_mapping_path = "models/move_to_int_architecture_v2"  # Mapping for opponent model (if categorical)
     
+    # Stockfish configuration
     stockfish_path = '/usr/games/stockfish'  # Path to stockfish executable (for mode='stockfish')
-    stockfish_elo = 1350  # Stockfish ELO rating (only used for opponent, not for statistics)
-    num_games = 100  # Number of games to play
+    stockfish_elo = 1350  # Stockfish ELO rating (only used for opponent, not for statistics) - minimum 1350
     time_limit = 0.01  # Time limit per move for Stockfish (in seconds)
+    
+    # Game configuration
+    num_games = 100  # Number of games to play
     
     # Initialize main model
     if model_type == 'categorical':

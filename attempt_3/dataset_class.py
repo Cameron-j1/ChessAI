@@ -25,7 +25,7 @@ class ChessDatasetSpatial(Dataset):
         if not isinstance(X, torch.Tensor):
             X = torch.tensor(X, dtype=torch.float32)
         if not isinstance(y, torch.Tensor):
-            y = torch.tensor(y, dtype=torch.float32)  # Spatial moves are float, not long
+            y = torch.tensor(y, dtype=torch.float32)
         self.X = X
         self.y = y
 

@@ -11,6 +11,26 @@ from evaluate import ChessEvaluator
 import sys
 import os
 
+
+# This node is designed to work with the RS2 ROS2 software package our group has created.
+# It subscribes to /fen_string topic to receive the current chess position
+# and publishes chess moves to /UCI_moves topic.
+# The node can use either Stockfish or a trained neural network model
+# to generate chess moves.
+#
+# Topics:
+# Subscribed:
+#   /fen_string (std_msgs/String) - Current chess position in FEN notation
+# Published: 
+#   /UCI_moves (std_msgs/String) - Generated chess moves in UCI format
+#
+# Parameters:
+#   use_stockfish (bool) - Whether to use Stockfish engine (True) or neural network (False)
+#   stockfish_elo (int) - ELO rating for Stockfish engine
+#   stockfish_time_limit (float) - Time limit per move in seconds
+#   model_type (str) - Type of neural network model ('categorical' or 'spatial')
+#   model_path (str) - Path to neural network model weights
+#   mapping_path (str) - Path to move mappings for categorical models
 class ChessModelNode(Node):
     def __init__(self):
         super().__init__('chess_model_node')

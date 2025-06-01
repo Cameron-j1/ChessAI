@@ -112,8 +112,9 @@ if __name__ == "__main__":
     STOCKFISH_TIME_LIMIT = 0.03  # Time limit per move in seconds
     LOG_FREQUENCY = 100  # How often to log progress (every N games)
     
-    input_pgn = 'standardover2000-2021.pgn'
-    output_pgn = 'standardover2000-2021_processed.pgn'
+    # Input and output file paths - edit these to fill out all the PGNs that need to be processed
+    input_pgn = 'Hort.pgn'
+    output_pgn = 'Hort_processed.pgn'
     
     if not Path(input_pgn).exists():
         print(f"Input file {input_pgn} does not exist!")

@@ -1,5 +1,7 @@
 /chess_env
 /attempt_3/chess_env
 *.pth
+!attention_model_checkpoint_epoch_10.pth
 *.pgn
+!Hort.pgn
 *.npz

@@ -13,7 +13,7 @@ import gc
 
 from other_functions import create_input_for_nn, encode_moves_spatial
 from dataset_class import ChessDatasetSpatial
-from chess_model_class import ChessModelSpatial
+from chess_model_class import ChessModelSpatial #this import source file will need to change for each different model net you want to train
 
 
 def load_pgn(file_path):
@@ -186,11 +186,10 @@ def train_spatial_model():
     
     # Initialize optimizer with weight decay for regularization
     initial_lr = 0.001
-    weight_decay = 1e-4  # L2 regularization
+    weight_decay = 1e-4 
     optimizer = optim.Adam(model.parameters(), lr=initial_lr, weight_decay=weight_decay)
     
-    # Add cosine annealing scheduler
-    num_epochs = 100  # Increased for actual training
+    num_epochs = 100 
     scheduler = CosineAnnealingLR(optimizer, T_max=num_epochs, eta_min=1e-6)
     
     print(f"Training with batch size: {batch_size}, initial learning rate: {initial_lr}")

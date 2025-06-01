@@ -108,7 +108,7 @@ def decode_move_spatial(prediction, legal_moves):
     return None
 
 
-# Keep the old function for backward compatibility
+# Keep the old categoricalfunction for backward compatibility
 def encode_moves(moves):
     move_to_int = {move: idx for idx, move in enumerate(set(moves))}
     return np.array([move_to_int[move] for move in moves], dtype=np.float32), move_to_int

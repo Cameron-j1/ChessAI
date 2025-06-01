@@ -13,7 +13,7 @@ import gc
 
 from other_functions import create_input_for_nn, encode_moves_spatial
 from dataset_class import ChessDatasetSpatial
-from chess_model_class_attention import ChessModelAttention  # Changed import
+from chess_model_class_attention import ChessModelAttention  #this import source file will need to change for each different model net you want to train
 
 
 def load_pgn(file_path):
@@ -174,8 +174,7 @@ def train_attention_model():
     # Create Dataset and DataLoader
     dataset = ChessDatasetSpatial(X, y_spatial)
     
-    # Adjusted batch size for the larger model
-    batch_size = 256  # Reduced from 512 due to larger model size
+    batch_size = 256
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     
     # Check for GPU
@@ -186,12 +185,10 @@ def train_attention_model():
     model = ChessModelAttention(num_blocks=8, dropout_rate=0.2).to(device)
     criterion = SpatialMoveLoss()
     
-    # Adjusted learning rate and weight decay for the attention model
-    initial_lr = 0.0005  # Reduced from 0.001 due to larger model
-    weight_decay = 2e-4  # Increased from 1e-4 for better regularization
+    initial_lr = 0.0005
+    weight_decay = 2e-4  # Increased from 1e-4 for better regularization and to prevent overfitting
     optimizer = optim.AdamW(model.parameters(), lr=initial_lr, weight_decay=weight_decay)
     
-    # Adjusted learning rate schedule
     num_epochs = 100
     scheduler = CosineAnnealingLR(optimizer, T_max=num_epochs, eta_min=1e-6)
     
