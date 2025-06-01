@@ -238,6 +238,14 @@ section h2 {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 400px;
+    position: relative;
+}
+
+/* Ensure the embedded content is properly sized */
+.lichess-embed > * {
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
 .lichess-embed iframe {
@@ -390,4 +398,20 @@ section h2 {
     color: var(--primary-color);
     margin-bottom: 1.5rem;
     text-align: center;
+}
+
+/* Add a loading state */
+.lichess-embed::before {
+    content: "Loading statistics...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-color);
+    font-style: italic;
+}
+
+/* Hide loading text once content is loaded */
+.lichess-embed.loaded::before {
+    display: none;
 } 
