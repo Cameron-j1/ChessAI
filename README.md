@@ -1,5 +1,7 @@
 # ChessAI - Deep Learning Chess Engine
 
+NOTE - this readme pertains to the contents of the CNN folder and not the SVM code
+
 A PyTorch-based chess AI that uses deep learning to predict moves from board positions. The project supports multiple model architectures including spatial CNN models and attention-enhanced models.
 
 ## Setup
