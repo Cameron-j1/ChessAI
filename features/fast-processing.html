@@ -8,8 +8,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="../scripts/scroll-animations.js" defer></script>
     <style>
-        .feature-detail-section {
-            margin-top: 100px;  /* Add margin to prevent header overlap */
+        .processing-section {
+            margin-top: 100px;
+        }
+        .processing-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .step {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .step:hover {
+            transform: translateY(-5px);
+        }
+        .step i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        .step h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        .step p {
+            color: #666;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -27,49 +57,36 @@
     </header>
 
     <main>
-        <section class="feature-detail-section">
-            <h1>Fast Processing</h1>
+        <section class="processing-section">
             <div class="feature-content">
-                <div class="feature-section">
-                    <h2>Optimized Search Depth</h2>
-                    <p>Our chess engine implements an adaptive search depth strategy to balance performance and computational efficiency:</p>
-                    <ul class="feature-list">
-                        <li><strong>Standard Position:</strong> 3-ply depth with 5 check extensions for normal gameplay</li>
-                        <li><strong>Endgame Position:</strong> 4-ply depth with 5 check extensions when fewer than 10 pieces remain on the board</li>
-                        <li><strong>Performance Optimization:</strong> These depths were carefully chosen as the optimal balance between search quality and computational time</li>
-                    </ul>
-                    <p>This configuration ensures:</p>
-                    <ul class="feature-list">
-                        <li>Responsive move generation in standard positions</li>
-                        <li>Deeper analysis in endgame scenarios where precision is crucial</li>
-                        <li>Consistent performance without computational bottlenecks</li>
-                    </ul>
-                </div>
-
-                <div class="feature-section">
-                    <h2>Efficient Move Generation</h2>
-                    <p>Our engine prioritizes quick and effective move generation:</p>
-                    <ul class="feature-list">
-                        <li><strong>Checkmate Detection:</strong> Immediate response to checkmate opportunities</li>
-                        <li><strong>Move Filtering:</strong> Intelligent filtering of neural network moves to prevent blunders</li>
-                        <li><strong>Performance Impact:</strong> Average response time under 0.2 seconds per move</li>
-                    </ul>
-                    <p>Key optimizations include:</p>
-                    <ul class="feature-list">
-                        <li>Efficient board representation for quick move generation</li>
-                        <li>Prioritized move ordering based on piece values</li>
-                        <li>Quick evaluation of tactical positions</li>
-                    </ul>
-                </div>
-
-                <div class="feature-section">
-                    <h2>Computational Efficiency</h2>
-                    <p>The engine is designed to maintain consistent performance across different game phases:</p>
-                    <ul class="feature-list">
-                        <li>Average move generation time under 0.2 seconds</li>
-                        <li>Dynamic depth adjustment based on position complexity</li>
-                        <li>Efficient memory usage through position caching</li>
-                    </ul>
+                <h1>Fast Processing</h1>
+                <p>Our engine uses a sophisticated move generation pipeline that combines tactical awareness with neural network predictions:</p>
+                <div class="processing-steps">
+                    <div class="step">
+                        <i class="fas fa-chess-king"></i>
+                        <h3>Checkmate Search</h3>
+                        <p>First, the engine performs a tactical search for forced checkmate sequences. This ensures we don't miss winning opportunities.</p>
+                    </div>
+                    <div class="step">
+                        <i class="fas fa-brain"></i>
+                        <h3>Model Prediction</h3>
+                        <p>If no checkmate is found, the neural network generates candidate moves based on its understanding of the position.</p>
+                    </div>
+                    <div class="step">
+                        <i class="fas fa-shield-alt"></i>
+                        <h3>Safety Check</h3>
+                        <p>Each model-generated move is verified to ensure it doesn't allow the opponent to force checkmate in response.</p>
+                    </div>
+                    <div class="step">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Blunder Prevention</h3>
+                        <p>Moves are checked against a set of tactical criteria to prevent obvious blunders and material losses.</p>
+                    </div>
+                    <div class="step">
+                        <i class="fas fa-play"></i>
+                        <h3>Move Selection</h3>
+                        <p>The first move that passes all safety checks is selected for play, ensuring both tactical soundness and strategic quality.</p>
+                    </div>
                 </div>
             </div>
         </section>

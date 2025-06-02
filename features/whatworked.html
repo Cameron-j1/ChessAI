@@ -135,6 +135,20 @@
         <section class="feature-detail-section">
             <h1>Our Development Journey</h1>
             <div class="feature-content">
+                <div class="project-overview" style="text-align: center; max-width: 800px; margin: 0 auto; padding: 2rem; background: linear-gradient(145deg, #ffffff, #f8f9fa); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h2 style="color: var(--primary-color); font-size: 2.2rem; margin-bottom: 1.5rem; font-weight: 600;">Development Journey</h2>
+                    <p style="font-size: 1.1rem; line-height: 1.6; color: #444; margin-bottom: 1rem;">From SVM-based evaluation to attention-based neural networks, our project has undergone significant evolution.</p>
+                    <p style="font-size: 1.1rem; line-height: 1.6; color: #444;">Each phase brought new insights and improvements, leading to our current sophisticated chess engine.</p>
+                    <div style="margin-top: 2rem; padding: 1rem; background: rgba(52, 152, 219, 0.1); border-radius: 10px;">
+                        <h3 style="color: var(--primary-color); font-size: 1.3rem; margin-bottom: 1rem;">Development Phases</h3>
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            <li style="margin-bottom: 0.5rem;"><i class="fas fa-chess" style="color: #27ae60; margin-right: 0.5rem;"></i>SVM-based move evaluation with 16,000 games</li>
+                            <li style="margin-bottom: 0.5rem;"><i class="fas fa-chess-board" style="color: #27ae60; margin-right: 0.5rem;"></i>Spatial move prediction with 8x8 representation</li>
+                            <li><i class="fas fa-brain" style="color: #27ae60; margin-right: 0.5rem;"></i>Attention-based neural network with 3.9M positions</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="development-journey">
                     <h3>The Path to Our Final ChessAI</h3>
                     <p>Our journey to create a strong chess AI involved several key phases, each building upon the lessons learned from the previous attempts. Here's how we evolved from simple move prediction to a sophisticated neural network-based chess engine.</p>
@@ -287,8 +301,46 @@ def train_attention_model():
                         <p>Based on our development journey, we've identified several areas for improvement:</p>
                         <ul class="feature-list">
                             <li><strong>Value Head Integration:</strong> Adding position evaluation capabilities to enable deeper search</li>
-                            <li><strong>Search Optimization:</strong> Implementing more sophisticated search algorithms</li>
+                            <li><strong>Search Optimization:</strong> 
+                                <ul>
+                                    <li>Implementing alpha-beta pruning for efficient move exploration</li>
+                                    <li>Adding move ordering based on neural network predictions</li>
+                                    <li>Developing quiescence search for tactical positions</li>
+                                </ul>
+                            </li>
                             <li><strong>Training Enhancement:</strong> Exploring self-play and reinforcement learning techniques</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="future-section">
+                    <h2>Future Improvements</h2>
+                    <div class="ai-model-section">
+                        <h3>Technical Roadmap</h3>
+                        <p>Our next development phase will focus on these key improvements:</p>
+                        <ul class="feature-list">
+                            <li><strong>Alpha-Beta Pruning Implementation:</strong>
+                                <ul>
+                                    <li>Add value head to neural network for position evaluation</li>
+                                    <li>Implement iterative deepening with alpha-beta pruning</li>
+                                    <li>Optimize move ordering using neural network predictions</li>
+                                    <li>Add transposition tables for position caching</li>
+                                </ul>
+                            </li>
+                            <li><strong>Search Optimization:</strong>
+                                <ul>
+                                    <li>Implement quiescence search for tactical positions</li>
+                                    <li>Add null-move pruning for faster search</li>
+                                    <li>Develop late-move reduction techniques</li>
+                                </ul>
+                            </li>
+                            <li><strong>Performance Enhancements:</strong>
+                                <ul>
+                                    <li>Optimize memory usage during search</li>
+                                    <li>Implement parallel search on multiple threads</li>
+                                    <li>Add move generation optimization</li>
+                                </ul>
+                            </li>
                         </ul>
                     </div>
                 </div>
