@@ -138,14 +138,58 @@
                             <li>REST API for game state management</li>
                         </ul>
                     </div>
-                </div>
 
-                <div class="results-section">
-                    <h2>Project Results</h2>
-                    <div class="results-content">
-                        <div class="results-gallery">
-                            <div class="gallery-item">
+                    <div class="doc-section">
+                        <h3>Training and Optimization</h3>
+                        <div class="training-section">
+                            <h4>Data Constraints</h4>
+                            <p>Due to limited computational resources, we were constrained to training on 3.9 million chess positions. While this was sufficient for our initial smaller network, it presented challenges when we expanded the network architecture to increase the bot's strength:</p>
+                            
+                            <div class="challenge-solution">
+                                <h4>Overfitting Challenges</h4>
+                                <p>As we expanded the network to increase the bot's playing strength, we encountered significant overfitting issues due to the limited training data. This manifested in:</p>
+                                <ul class="feature-list">
+                                    <li>Poor generalization to new positions</li>
+                                    <li>Memorization of specific game patterns</li>
+                                    <li>Inconsistent performance against different playing styles</li>
+                                </ul>
+                            </div>
 
+                            <div class="solution-section">
+                                <h4>Solutions Implemented</h4>
+                                
+                                <div class="solution-item">
+                                    <h5>1. Dropout Regularization</h5>
+                                    <p>Implemented dropout during training to prevent overfitting:</p>
+                                    <ul class="feature-list">
+                                        <li>Randomly sets a fraction of neurons to zero during training</li>
+                                        <li>Forces the network to not rely too heavily on specific neurons</li>
+                                        <li>Prevents memorization by prioritizing generalization</li>
+                                        <li>Creates a more robust network that can handle varied positions</li>
+                                    </ul>
+                                </div>
+
+                                <div class="solution-item">
+                                    <h5>2. Weight Decay</h5>
+                                    <p>Added weight decay for parameter regularization:</p>
+                                    <ul class="feature-list">
+                                        <li>Penalizes large weights to constrain model complexity</li>
+                                        <li>Forces the model to prefer smaller weights</li>
+                                        <li>Prevents sharp, dramatic decision changes based on specific inputs</li>
+                                        <li>Encourages smoother, more generalized decision boundaries</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="results-impact">
+                                <h4>Impact on Performance</h4>
+                                <p>These optimizations led to significant improvements:</p>
+                                <ul class="feature-list">
+                                    <li>Better generalization to new positions</li>
+                                    <li>More consistent performance across different playing styles</li>
+                                    <li>Reduced variance in move quality</li>
+                                    <li>Improved overall playing strength</li>
+                                </ul>
                             </div>
                         </div>
 

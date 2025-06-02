@@ -166,7 +166,7 @@
                     <div class="dropdown-content">
                         <a href="ai-powered.html">AI-Powered</a>
                         <a href="fast-processing.html">Fast Processing</a>
-                        <a href="results.html">Results and Documentation</a>
+                        <a href="results-documentation.html">Results and Documentation</a>
                     </div>
                 </li>
                 <li><a href="../index.html#demo">Demo</a></li>
@@ -315,26 +315,36 @@ class ChessModelAttention(nn.Module):
 
                     <div class="ai-model-section">
                         <h2>Phase 4: Training and Optimization</h2>
-                        <p>Our training process evolved significantly:</p>
+                        <p>Our training process faced unique challenges due to hardware constraints:</p>
                         <ul class="feature-list">
-                            <li><strong>Dataset Development:</strong> Curated 3.9M positions from master-level games</li>
-                            <li><strong>Training Strategy:</strong> Implemented cosine learning rate scheduling and careful regularization</li>
-                            <li><strong>Memory Management:</strong> Developed techniques to train the large model within 32GB RAM constraints</li>
-                            <li><strong>Key Learning:</strong> Learned the importance of balanced training between memorization and generalization</li>
+                            <li><strong>Limited Dataset Size:</strong> Due to PC constraints, we could only load 3.9M positions for training</li>
+                            <li><strong>Initial Network Performance:</strong> The smaller initial network handled this dataset size well with minimal overfitting</li>
+                            <li><strong>Expansion Challenges:</strong> When we expanded the network to increase bot strength, we encountered significant overfitting issues</li>
                         </ul>
-                        <div class="code-snippet">
-def train_attention_model():
-    # Model initialization with careful hyperparameter selection
-    model = ChessModelAttention(num_blocks=8, dropout_rate=0.2).to(device)
-    
-    # Optimized learning parameters
-    initial_lr = 0.0005
-    weight_decay = 2e-4
-    optimizer = optim.AdamW(model.parameters(), lr=initial_lr, weight_decay=weight_decay)
-    
-    # Cosine learning rate schedule for optimal convergence
-    scheduler = CosineAnnealingLR(optimizer, T_max=100, eta_min=1e-6)</div>
-                        <div class="code-reference">From attempt_3/train_spatial_attention.py - Training configuration showing our optimization approach</div>
+
+                        <h3>Solutions Implemented</h3>
+                        <div class="solution-box">
+                            <h4>1. Dropout Implementation</h4>
+                            <p>During training, dropout randomly sets a fraction of neurons to zero, which:</p>
+                            <ul class="feature-list">
+                                <li>Forces the network to not rely too heavily on specific neurons</li>
+                                <li>Prevents memorization of training data</li>
+                                <li>Prioritizes generalization over specific pattern recognition</li>
+                            </ul>
+                        </div>
+
+                        <div class="solution-box">
+                            <h4>2. Weight Decay</h4>
+                            <p>Implemented parameter regularization through weight decay, which:</p>
+                            <ul class="feature-list">
+                                <li>Constrains model complexity by penalizing large weights</li>
+                                <li>Encourages the model to prefer smaller weights</li>
+                                <li>Prevents overfitting by limiting the model's ability to make sharp, dramatic decisions based on specific inputs</li>
+                                <li>Forces the model to generalize rather than memorize specific patterns</li>
+                            </ul>
+                        </div>
+
+                        <p>These optimization techniques successfully balanced the trade-off between model capacity and generalization, allowing us to maintain strong performance despite the limited training data.</p>
                     </div>
                 </div>
 
@@ -344,12 +354,12 @@ def train_attention_model():
                         <h3>Planned Enhancements</h3>
                         <p>Based on our development journey, we've identified several areas for improvement:</p>
                         <ul class="feature-list">
-                            <li><strong>Value Head Integration:</strong> Adding position evaluation capabilities to enable deeper search</li>
-                            <li><strong>Search Optimization:</strong> 
+                            <li><strong>Value Head Integration:</strong> Adding position evaluation capabilities to enable alpha-beta pruning</li>
+                            <li><strong>Search Implementation:</strong> 
                                 <ul>
-                                    <li>Implementing alpha-beta pruning for efficient move exploration</li>
-                                    <li>Adding move ordering based on neural network predictions</li>
-                                    <li>Developing quiescence search for tactical positions</li>
+                                    <li>Implementing alpha-beta pruning with efficient move ordering</li>
+                                    <li>Using neural network predictions for move ordering to improve pruning efficiency</li>
+                                    <li>Leveraging the value head for position evaluation during search</li>
                                 </ul>
                             </li>
                             <li><strong>Training Enhancement:</strong> Exploring self-play and reinforcement learning techniques</li>
