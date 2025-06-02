@@ -9,7 +9,46 @@
     <script src="../scripts/scroll-animations.js" defer></script>
     <style>
         .feature-detail-section {
-            margin-top: 100px;  /* Add margin to prevent header overlap */
+            margin-top: 100px;
+        }
+        .success-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #27ae60;
+        }
+        .future-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+            margin-top: 2rem;
+        }
+        .code-snippet {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 0.9em;
+        }
+        .code-reference {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+        }
+        .development-journey {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .development-journey h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
         }
         /* Add dropdown styles */
         .dropdown {
@@ -73,38 +112,43 @@
         <section class="feature-detail-section">
             <h1>Results & Documentation</h1>
             <div class="feature-content">
-                <div class="documentation-section">
-                    <h2>Technical Documentation</h2>
-                    <div class="doc-section">
-                        <h3>System Architecture</h3>
+                <div class="project-overview" style="text-align: center; max-width: 800px; margin: 0 auto; padding: 2rem; background: linear-gradient(145deg, #ffffff, #f8f9fa); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h2 style="color: var(--primary-color); font-size: 2.2rem; margin-bottom: 1.5rem; font-weight: 600;">Project Results</h2>
+                    <p style="font-size: 1.1rem; line-height: 1.6; color: #444; margin-bottom: 1rem;">Our chess AI has achieved significant milestones in both performance and implementation.</p>
+                    <p style="font-size: 1.1rem; line-height: 1.6; color: #444;">From technical architecture to real-world testing, here's a comprehensive overview of our results.</p>
+                </div>
+
+                <div class="success-section">
+                    <div class="ai-model-section">
+                        <h2>Technical Architecture</h2>
                         <p>The ChessAI system consists of several key components:</p>
                         <ul class="feature-list">
                             <li><strong>Chess Engine Core:</strong> Implements the game logic and move generation</li>
-                            <li><strong>AI Models:</strong> SVM-based move evaluator and DQN for strategic decision making</li>
+                            <li><strong>AI Models:</strong> SVM-based move evaluator and attention-based neural network</li>
                             <li><strong>Robotics Interface:</strong> Integration with UR3e robotic arm and custom hardware</li>
                             <li><strong>Web Interface:</strong> User interaction and game visualization</li>
                         </ul>
                     </div>
 
-                    <div class="doc-section">
-                        <h3>Implementation Details</h3>
-                        <h4>Chess Engine</h4>
+                    <div class="ai-model-section">
+                        <h2>Implementation Details</h2>
+                        <h3>Chess Engine</h3>
                         <ul class="feature-list">
                             <li>Move generation using bitboard representation</li>
-                            <li>Alpha-Beta pruning with iterative deepening</li>
-                            <li>Adaptive search depth based on position complexity</li>
-                            <li>Check extension and quiescence search</li>
+                            <li>Efficient move validation and filtering</li>
+                            <li>Position evaluation through neural network</li>
+                            <li>Move quality assessment and ranking</li>
                         </ul>
 
-                        <h4>AI Components</h4>
+                        <h3>AI Components</h3>
                         <ul class="feature-list">
                             <li>SVM model trained on 16,000 high-quality games</li>
                             <li>Feature engineering for position evaluation</li>
-                            <li>DQN implementation with experience replay</li>
-                            <li>Reward shaping for strategic learning</li>
+                            <li>Attention-based neural network with 3.9M positions</li>
+                            <li>Optimized training pipeline with dropout and weight decay</li>
                         </ul>
 
-                        <h4>Robotics Integration</h4>
+                        <h3>Robotics Integration</h3>
                         <div class="robotics-integration-box">
                             <div class="robotics-feature">
                                 <i class="fas fa-robot"></i>
@@ -129,37 +173,35 @@
                         </div>
                     </div>
 
-                    <div class="doc-section">
-                        <h3>API Documentation</h3>
-                        <p>Key interfaces and endpoints:</p>
-                        <ul class="feature-list">
-                            <li>Lichess API integration for online play</li>
-                            <li>Robotics Studio 2 ROS2 Node for arm control</li>
-                            <li>REST API for game state management</li>
-                        </ul>
-                    </div>
-
-                    <div class="doc-section">
-                        <h3>Training and Optimization</h3>
-                        <div class="training-section">
-                            <h4>Data Constraints</h4>
-                            <p>Due to limited computational resources, we were constrained to training on 3.9 million chess positions. While this was sufficient for our initial smaller network, it presented challenges when we expanded the network architecture to increase the bot's strength:</p>
-                            
-                            <div class="challenge-solution">
-                                <h4>Overfitting Challenges</h4>
-                                <p>As we expanded the network to increase the bot's playing strength, we encountered significant overfitting issues due to the limited training data. This manifested in:</p>
-                                <ul class="feature-list">
-                                    <li>Poor generalization to new positions</li>
-                                    <li>Memorization of specific game patterns</li>
-                                    <li>Inconsistent performance against different playing styles</li>
-                                </ul>
+                    <div class="ai-model-section">
+                        <h2>Performance Results</h2>
+                        <div class="results-content">
+                            <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+                                <div style="flex: 1;">
+                                    <h3>Key Achievements</h3>
+                                    <ul class="feature-list">
+                                        <li>Successfully implemented an attention-based neural network architecture for move prediction</li>
+                                        <li>Trained the model on 3.9M chess positions from master-level games</li>
+                                        <li>Achieved strong performance through spatial move encoding and position evaluation</li>
+                                        <li>Integrated with Lichess API for online play against human opponents</li>
+                                        <li>Created a functional Chess Robot that brings the AI into the physical world</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1;">
+                                    <img src="../stockfish17.png" alt="Stockfish 17 Comparison" style="width: 100%; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                                    <p style="text-align: center; margin-top: 0.5rem; color: #666; font-size: 0.9em;">Performance against Stockfish set to 1650 ELO</p>
+                                </div>
                             </div>
 
+                            <div style="margin-bottom: 2rem;">
+                                <img src="../lichessTest.png" alt="Lichess Test Results" style="width: 100%; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                                <p style="text-align: center; margin-top: 0.5rem; color: #666; font-size: 0.9em;">Lichess API integration test results</p>
+                            </div>
+
+                            <h3>Training Optimization</h3>
                             <div class="solution-section">
-                                <h4>Solutions Implemented</h4>
-                                
                                 <div class="solution-item">
-                                    <h5>1. Dropout Regularization</h5>
+                                    <h4>1. Dropout Regularization</h4>
                                     <p>Implemented dropout during training to prevent overfitting:</p>
                                     <ul class="feature-list">
                                         <li>Randomly sets a fraction of neurons to zero during training</li>
@@ -170,7 +212,7 @@
                                 </div>
 
                                 <div class="solution-item">
-                                    <h5>2. Weight Decay</h5>
+                                    <h4>2. Weight Decay</h4>
                                     <p>Added weight decay for parameter regularization:</p>
                                     <ul class="feature-list">
                                         <li>Penalizes large weights to constrain model complexity</li>
@@ -180,38 +222,26 @@
                                     </ul>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <div class="results-impact">
-                                <h4>Impact on Performance</h4>
-                                <p>These optimizations led to significant improvements:</p>
-                                <ul class="feature-list">
-                                    <li>Better generalization to new positions</li>
-                                    <li>More consistent performance across different playing styles</li>
-                                    <li>Reduced variance in move quality</li>
-                                    <li>Improved overall playing strength</li>
+                <div class="future-section">
+                    <h2>Future Development Path</h2>
+                    <div class="ai-model-section">
+                        <h3>Planned Enhancements</h3>
+                        <p>Based on our current results, we've identified several areas for improvement:</p>
+                        <ul class="feature-list">
+                            <li><strong>Value Head Integration:</strong> Adding position evaluation capabilities to enable alpha-beta pruning</li>
+                            <li><strong>Search Implementation:</strong> 
+                                <ul>
+                                    <li>Implementing alpha-beta pruning with efficient move ordering</li>
+                                    <li>Using neural network predictions for move ordering to improve pruning efficiency</li>
+                                    <li>Leveraging the value head for position evaluation during search</li>
                                 </ul>
-                            </div>
-                        </div>
-
-                        <div class="results-text">
-                            <h3>Key Achievements</h3>
-                            <ul class="feature-list">
-                                <li>Successfully implemented an attention-based neural network architecture for move prediction</li>
-                                <li>Trained the model on over 1 million chess positions from master-level games</li>
-                                <li>Achieved strong performance through spatial move encoding and position evaluation</li>
-                                <li>Integrated with Lichess API for online play against human opponents</li>
-                                <li>Created a functional Chess Robot that brings the AI into the physical world</li>
-                            </ul>
-
-                            <h3>Future Improvements</h3>
-                            <ul class="feature-list">
-                                <li>Improved robotic arm precision and speed</li>
-                                <li>Extended testing against stronger opponents</li>
-                                <li>Implement comprehensive performance metrics and benchmarking</li>
-                                <li>Enhance model strength through advanced training techniques</li>
-                                <li>Optimize neural network architecture for better positional understanding</li>
-                            </ul>
-                        </div>
+                            </li>
+                            <li><strong>Training Enhancement:</strong> Exploring self-play and reinforcement learning techniques</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -220,7 +250,7 @@
 
     <footer class="footer">
         <div class="footer-content">
-            <p>&copy; 2024 ChessAI Project - University of Technology Sydney. All rights reserved.</p>
+            <p>&copy; 2025 ChessAI Project - University of Technology Sydney. All rights reserved.</p>
             <div class="social-links">
                 <a href="https://github.com/cameron-j1" target="_blank"><i class="fab fa-github"></i></a>
             </div>
